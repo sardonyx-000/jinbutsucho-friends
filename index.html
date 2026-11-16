@@ -1,0 +1,761 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#F8F2E7"><title>人物帖 v1.6.16 — 探索者管理</title><link rel="manifest" href="./manifest.webmanifest?v=1615"><link rel="icon" href="./icon-192.png?v=1615"><link rel="apple-touch-icon" href="./apple-touch-icon.png?v=1615"><meta name="apple-mobile-web-app-capable" content="yes"><style>
+:root{--bg:#f7f5f0;--paper:#fff;--ink:#292725;--muted:#77736e;--line:#e5e0d8;--accent:#98675b;--soft:#f1e8e3}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Noto Sans JP',sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4}header{position:sticky;top:0;background:#f7f5f0ee;backdrop-filter:blur(12px);z-index:5;border-bottom:1px solid var(--line)}.wrap{max-width:780px;margin:auto;padding:18px}header .wrap{display:flex;align-items:center;justify-content:space-between;padding-top:12px;padding-bottom:12px}.logo{font-family:serif;font-size:25px;letter-spacing:.12em}.small{font-size:12px;color:var(--muted)}nav{position:sticky;bottom:0;background:#fffefaf2;border-top:1px solid var(--line);z-index:4;display:flex;justify-content:center;gap:5px;padding:8px 10px calc(8px + env(safe-area-inset-bottom))}nav button{background:none;border:0;padding:10px 16px;color:var(--muted);border-radius:10px}nav button.active{background:var(--soft);color:var(--accent);font-weight:700}.btn{border:1px solid var(--line);background:white;color:var(--ink);padding:11px 14px;border-radius:10px}.primary{background:var(--accent);color:white;border-color:var(--accent)}.danger{color:#9c3535}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.card{background:var(--paper);border:1px solid var(--line);border-radius:15px;overflow:hidden;text-align:left;padding:0}.card img{width:100%;height:220px;object-fit:contain;object-position:bottom;background:linear-gradient(140deg,#e8e0d9,#f4f1ec)}.card .info{padding:13px}.card strong{display:block;font-size:17px}.pill{display:inline-block;padding:4px 9px;border-radius:99px;background:var(--soft);color:var(--accent);font-size:11px}.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:16px;margin:14px 0}.field{display:block;margin:12px 0}.field>span{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}input:not([type=file]),textarea,select{width:100%;border:1px solid #d8d1c9;background:white;padding:11px;border-radius:9px;color:var(--ink)}textarea{min-height:88px;resize:vertical}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hero{background:linear-gradient(140deg,#e9e3de,#f8f6f2);border-radius:18px;min-height:350px;display:flex;justify-content:center;align-items:end;overflow:hidden}.hero img{height:360px;max-width:100%;object-fit:contain;object-position:bottom}.tabs{display:flex;gap:5px;overflow-x:auto;padding:10px 0}.tabs button{flex:1;white-space:nowrap}.bar{height:6px;background:#eee9e3;border-radius:8px;overflow:hidden;margin-top:6px}.bar>div{height:100%;background:var(--accent)}.skillrow{margin:13px 0}.skillrow .line{display:flex;justify-content:space-between;gap:8px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.stat{background:#f8f6f3;text-align:center;padding:11px 3px;border-radius:9px}.stat b{display:block;font-size:21px}.notice{font-size:12px;color:#796b5b;background:#f5eee2;padding:12px;border-radius:10px}.actions{display:flex;gap:8px;flex-wrap:wrap}.empty{padding:35px 15px;text-align:center;color:var(--muted)}.hidden{display:none!important}h1{font-family:serif;font-weight:500;font-size:30px}h2{font-size:19px;font-weight:600}hr{border:0;border-top:1px solid var(--line);margin:20px 0}details{border:1px solid var(--line);padding:12px;border-radius:10px}summary{cursor:pointer}.rank{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line);cursor:pointer}.rank .num{width:28px;color:var(--accent);font-weight:700}.rank .who{flex:1}.rank .score{font-size:22px;font-weight:700}.editSkill{display:grid;grid-template-columns:1fr 70px 65px 32px;gap:5px;margin:6px 0;align-items:center}.editSkill input{min-width:0;padding:8px}.editSkill button{border:0;background:#f3eeee;border-radius:7px;height:36px}.muted{color:var(--muted)}@media(min-width:650px){.grid{grid-template-columns:repeat(3,1fr)}.card img{height:260px}.hero img{height:440px}.hero{min-height:440px}}@media(max-width:370px){nav button{padding:9px 11px}.editSkill{grid-template-columns:1fr 58px 58px 28px}nav button{padding:9px 8px;font-size:12px}}
+.skill-category{margin:22px 0 26px}.skill-category-title{font-size:16px;letter-spacing:.04em;border-bottom:1px solid var(--line);padding:0 0 10px;margin:0 0 13px;color:var(--ink)}.skill-category-title .small{font-weight:400;margin-left:8px}.skill-category .skillrow{margin:12px 0 16px}.picCharRow input{width:19px;height:19px;accent-color:var(--accent)}
+</style><style>
+.skill-overlay{position:fixed;inset:0;z-index:1000;background:rgba(22,21,23,.62);display:flex;align-items:flex-end;justify-content:center;padding:0}
+.skill-dialog{background:#fffefa;color:#25272a;border-radius:20px 20px 0 0;width:100%;max-width:650px;max-height:88dvh;overflow:auto;padding:20px 18px 28px;box-shadow:0 -8px 40px #0003}
+.skill-query{width:100%;box-sizing:border-box;padding:14px;border:1px solid #d9d1c8;border-radius:10px;background:#fff;margin:8px 0 12px;font-size:16px;color:#25272a}
+.skill-picker-list{max-height:55dvh;overflow:auto}.skill-pick-row{display:flex;gap:7px;align-items:center;padding:7px 0;border-bottom:1px solid #e8e3db}
+.skill-pick-name{flex:1;border:0;background:transparent;text-align:left;padding:12px 3px;font-size:15px;color:#25272a}
+.lost-card{filter:grayscale(.78);opacity:.75}.lost-ribbon{display:inline-block;background:#3f4149;color:#fff;border-radius:4px;padding:3px 8px;font-size:11px;letter-spacing:.1em}.lost-toggle{display:flex;align-items:center;gap:9px;margin:12px 0;padding:10px 12px;border:1px solid var(--line);border-radius:8px}.lost-toggle input{width:18px;height:18px;accent-color:var(--accent)}
+</style><style>
+.gallery-stage{position:relative;min-height:290px;display:grid;place-items:center;background:#ede9e4;border-radius:12px;overflow:hidden}
+.gallery-stage img{display:block;max-width:100%;width:100%;height:430px;object-fit:contain}
+.gallery-arrow{position:absolute;top:45%;border:0;border-radius:50%;width:40px;height:40px;background:#fffddded;font-size:24px;color:#292725;z-index:2}
+.gallery-arrow.prev{left:8px}.gallery-arrow.next{right:8px}
+.gallery-counter{text-align:center;font-size:12px;color:var(--muted);padding:8px}
+.gallery-edit-row{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.gallery-edit-row img{width:58px;height:72px;object-fit:contain;background:#eee;border-radius:6px}
+.memo-edit-row{border:1px solid var(--line);padding:12px;border-radius:10px;margin:10px 0}
+.memo-edit-row textarea{min-height:80px}
+</style><style>.madness-delta{font-size:11px;color:#a14c3d}.madness-record{border-bottom:1px solid var(--line);padding:12px 0}.madness-record p{margin:7px 0}</style><style>
+.editor-section{margin:12px 0}.editor-fold{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel,#fff)}.editor-fold>summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;flex-direction:column;gap:4px;position:relative;padding-right:48px;font-weight:700}.editor-fold>summary::-webkit-details-marker{display:none}.editor-fold>summary:after{content:'⌄';position:absolute;right:18px;top:18px;font-size:22px;line-height:1}.editor-fold[open]>summary:after{content:'⌃'}.editor-fold>summary small{font-size:12px;font-weight:400;color:var(--muted)}.editor-fold[open]>summary{border-bottom:1px solid var(--line)}.editor-fold-body{padding:14px 16px 18px}.editor-fold-body>h2:first-child{margin-top:0}#editor>.actions{position:sticky;bottom:0;z-index:5;background:var(--bg,#faf8f4);padding:12px 4px;box-shadow:0 -4px 16px #00000010}
+</style><style id="threshold-style">.threshold{padding:12px 0 6px}.threshold-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px}.threshold-head strong{color:var(--accent);font-size:21px;font-variant-numeric:tabular-nums}.threshold input[type=range]{width:100%;height:30px;accent-color:var(--accent);touch-action:pan-y}.threshold-foot{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;gap:8px}.threshold-foot label{display:flex;align-items:center;gap:5px}.threshold-foot input{width:66px;padding:6px;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);text-align:center}.base-check{display:flex;align-items:center;gap:10px;margin:14px 0 7px;padding:10px;background:var(--soft);border-radius:8px;font-size:14px}.base-check input{width:20px;height:20px;accent-color:var(--accent);flex-shrink:0}</style><style>
+.memory-albums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.memory-album{border:1px solid var(--line);background:white;border-radius:13px;overflow:hidden;text-align:left;padding:0}.memory-cover{width:100%;aspect-ratio:4/3;object-fit:cover;background:#ece5dd;display:grid;place-items:center;font-size:36px}.memory-album-body{padding:11px}.memory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.memory-tile{border:0;padding:0;background:#e9e2dc;aspect-ratio:1;overflow:hidden;border-radius:8px}.memory-tile img{width:100%;height:100%;object-fit:cover}.memory-lightbox{position:fixed;inset:0;background:#111e;color:white;z-index:1300;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px}.memory-lightbox img{max-width:100%;max-height:72dvh;object-fit:contain}.memory-lightbox .btn{color:#222}.memory-meta{white-space:pre-wrap;overflow-wrap:anywhere}.memory-imgrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.memory-imgrow img{width:70px;height:70px;object-fit:cover;border-radius:7px}@media(min-width:650px){.memory-albums{grid-template-columns:repeat(3,minmax(0,1fr))}.memory-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+</style><style id="compact-bottom-nav">
+/* 5タブを均等に配置。狭いスマホでもボタンがはみ出さない */
+#nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(2px,1vw,7px);width:100%;max-width:100%;padding:7px max(7px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(7px,env(safe-area-inset-right));justify-content:stretch;align-items:stretch;box-shadow:0 -3px 14px #29272509}
+#nav button{min-width:0;width:100%;padding:11px 1px;font-size:clamp(10px,2.7vw,12px);line-height:1.25;letter-spacing:-.035em;white-space:nowrap;text-align:center;border:1px solid transparent;border-radius:10px;transition:background .15s,color .15s}
+#nav button.active{background:var(--soft);color:var(--accent);border-color:#98675b26;font-weight:700}
+#nav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+@media(min-width:650px){#nav{max-width:720px;margin-inline:auto;gap:8px;padding-inline:14px}#nav button{font-size:13px;padding:12px 6px}}
+@media(max-width:340px){#nav{gap:2px;padding-left:4px;padding-right:4px}#nav button{font-size:10px;letter-spacing:-.06em}}
+#nav button{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:7px 1px 6px;min-height:55px;white-space:normal;letter-spacing:0}
+#nav button svg{display:block;width:20px;height:20px;flex:none;stroke-width:1.8}
+#nav button span{display:block;font-size:clamp(9px,2.6vw,11px);line-height:1.15;white-space:nowrap}
+#nav button.active svg{stroke-width:2.2}
+@media(min-width:650px){#nav button{padding:9px 4px;min-height:61px}#nav button svg{width:22px;height:22px}#nav button span{font-size:12px}}
+</style><style id="simple-navigation">
+/* すっきりした共通線幅のアイコン。既存の5タブと操作は維持 */
+#nav button{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:56px}
+#nav .simple-nav-icon{width:23px;height:23px;flex:none}
+#nav button span{font-size:clamp(9px,2.55vw,11px);letter-spacing:-.02em;line-height:1.25}
+#nav button.active::before{content:none}
+@media(max-width:350px){#nav .simple-nav-icon{width:22px;height:22px}#nav button span{font-size:9px}}
+
+/* 思い出ガチャ */
+.memory-gacha-actions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.memory-gacha-actions .btn{flex:1;min-width:115px}
+.memory-gacha-overlay{position:fixed;inset:0;z-index:1200;background:radial-gradient(ellipse at 50% 30%,#34283c,#0d0b15 75%);color:#f5e7d5;overflow-y:auto;padding:22px 16px 44px;box-sizing:border-box}
+.memory-gacha-top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:780px;margin:0 auto 16px}
+.memory-gacha-title{font-size:22px;font-weight:700;letter-spacing:.09em;margin:8px 0 4px;text-align:center}
+.memory-gacha-sub{text-align:center;color:#d4bb96;font-size:13px;margin:0 0 20px}
+.memory-gacha-card{border:1px solid #ad8656;border-radius:14px;background:linear-gradient(135deg,#27202d,#17151f);overflow:hidden;box-shadow:0 0 25px #b08a5430}
+.memory-gacha-card img{width:100%;height:100%;object-fit:contain;display:block}
+.memory-gacha-card .memory-gacha-caption{padding:10px;color:#f4e2c8;overflow-wrap:anywhere;text-align:center}
+.memory-gacha-single{max-width:560px;margin:0 auto}
+.memory-gacha-single .memory-gacha-card img{max-height:64dvh;min-height:240px}
+.memory-gacha-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-width:780px;margin:0 auto}
+.memory-gacha-grid .memory-gacha-card img{height:170px;object-fit:cover}
+.memory-gacha-grid .memory-gacha-caption{font-size:12px;min-height:40px}
+.memory-gacha-actions-bottom{max-width:780px;margin:18px auto;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.memory-gacha-overlay .btn{background:#4b382a;color:#f7e7d0;border:1px solid #ab8559}
+.memory-gacha-overlay .btn.primary{background:#9c7545;color:white}
+.memory-gacha-card.revealing{animation:memoryGachaReveal .18s ease-out both}
+@keyframes memoryGachaReveal{from{opacity:0;transform:translateY(20px) scale(.94);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+@media(min-width:650px){.memory-gacha-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){.memory-gacha-card.revealing{animation:none}}
+
+.memory-ritual-screen{position:fixed;inset:0;z-index:1250;background:#070910;overflow:hidden}
+.memory-ritual-screen iframe{position:absolute;inset:0;width:100%;height:100%;border:0;filter:grayscale(1) brightness(1.03)}
+.memory-ritual-label{position:absolute;left:0;right:0;bottom:9%;text-align:center;color:#fff;font-weight:700;letter-spacing:.22em;text-shadow:0 0 16px #fff9;pointer-events:none;animation:memoryRitualPulse 1s ease-in-out infinite alternate}
+.memory-ritual-skip{position:absolute;top:20px;right:18px;z-index:2;border:1px solid #aab4c7;border-radius:10px;background:#1b1b29d9;color:#fff;padding:10px 16px;font:inherit}
+@keyframes memoryRitualPulse{from{opacity:.4}to{opacity:1}}
+/* Keep the original white sigil visible while the illustration bursts through it. */
+.memory-ritual-screen{pointer-events:auto}
+.memory-ritual-screen.memory-revealing{pointer-events:none;animation:memoryRitualDissolve .92s ease-out both}
+@keyframes memoryRitualDissolve{0%,17%{opacity:1}65%{opacity:.28}100%{opacity:0}}
+.memory-ritual-burst{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;
+ background:radial-gradient(circle at 50% 48%,#fff 0%,#fffef8ee 12%,#ffffff80 31%,#ffffff00 66%);
+ transform:scale(.25);filter:blur(5px)}
+.memory-ritual-screen.memory-revealing .memory-ritual-burst{animation:memoryBurst .92s cubic-bezier(.14,.72,.2,1) both}
+@keyframes memoryBurst{0%{opacity:.06;transform:scale(.18)}20%{opacity:.54;transform:scale(.65)}45%{opacity:.82;transform:scale(1.12)}72%{opacity:.48;transform:scale(1.8)}100%{opacity:0;transform:scale(2.65)}}
+.memory-gacha-overlay.memory-appearing{animation:memoryResultEnter .66s .17s cubic-bezier(.16,.85,.25,1) both}
+@keyframes memoryResultEnter{0%{opacity:.15;filter:brightness(1.6)}55%{opacity:1;filter:brightness(1.15)}100%{opacity:1;filter:brightness(1)}}
+.memory-gacha-overlay.memory-appearing .memory-gacha-card.revealing{animation:memoryCardPop .55s .17s cubic-bezier(.16,1.2,.3,1) both}
+/* The final frame must be identical to the normal resting layout. */
+.memory-gacha-overlay.memory-settled{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}
+.memory-gacha-overlay.memory-settled .memory-gacha-card.revealing{animation:none!important;opacity:1!important;transform:none!important;filter:none!important}
+
+@keyframes memoryCardPop{0%{opacity:.25;transform:scale(.82);filter:brightness(2)}100%{opacity:1;transform:scale(1);filter:brightness(1)}}
+@media(prefers-reduced-motion:reduce){.memory-ritual-screen.memory-revealing .memory-ritual-burst,.memory-gacha-overlay.memory-appearing,.memory-gacha-overlay.memory-appearing .memory-gacha-card.revealing{animation:none}}
+
+</style></head><body><header><div class="wrap"><div><div class="logo">人物帖</div><div class="small">PRIVATE INVESTIGATOR ARCHIVE</div></div><button class="btn" onclick="newCharacter()">＋ 探索者</button></div></header><main class="wrap" id="app"></main><div id="summonIntegration" class="hidden" style="position:fixed;inset:0;z-index:200;background:#07070b"><iframe id="summonFrame" title="探索者召喚" style="border:0;width:100%;height:100%;display:block"></iframe></div><nav id="nav" aria-label="メインナビゲーション"><button onclick="route('list')" aria-label="一覧"><svg class="simple-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h8M8 17h5"/></svg><span>一覧</span></button><button onclick="route('search')" aria-label="技能検索"><svg class="simple-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m15.5 15.5 5 5"/></svg><span>技能検索</span></button><button onclick="editId=null;route('edit')" aria-label="追加・編集"><svg class="simple-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l11-11-4-4L4 16v4Z"/><path d="m13 7 4 4"/></svg><span>追加・編集</span></button><button onclick="route('gallery')" aria-label="思い出"><svg class="simple-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="m5.5 17 4.2-4 3.1 2.8 3.4-4 2.3 2.7"/></svg><span>思い出</span></button><button onclick="route('settings')" aria-label="保存・設定"><svg class="simple-nav-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v6h8V3M8 21v-8h8v8"/></svg><span>保存・設定</span></button></nav><input type="file" id="importFile" accept=".json,application/json" hidden><script>
+const SEED=null; // 個人データ・立ち絵は同梱しない
+const KEY='jinbutsucho_stable_v1_characters';
+let conditions=[{skill:'目星',min:70,aboveBase:false}],conditionMode='and',jobFilter='',tagFilter='',advancedSort='skill-desc';
+let skillPrefs={favorites:['目星','聞き耳','図書館'],order:[]};
+try{const saved=JSON.parse(localStorage.getItem('jinbutsucho_stable_v1_skill_prefs')||'null');if(saved&&Array.isArray(saved.favorites)&&Array.isArray(saved.order))skillPrefs=saved}catch(e){}
+function saveSkillPrefs(){try{localStorage.setItem('jinbutsucho_stable_v1_skill_prefs',JSON.stringify(skillPrefs))}catch(e){alert('技能の表示設定を保存できませんでした')}}
+function orderedSkillNames(){const names=allSkillNames();return names.sort((a,b)=>{const fa=skillPrefs.favorites.includes(a)?0:1,fb=skillPrefs.favorites.includes(b)?0:1;if(fa!==fb)return fa-fb;const ia=skillPrefs.order.indexOf(a),ib=skillPrefs.order.indexOf(b);return (ia<0?99999:ia)-(ib<0?99999:ib)||a.localeCompare(b,'ja')})}
+let skillPickerIndex=null,skillPickerQuery='';
+const CATEGORY_KEY='jinbutsucho_stable_v1_category_overrides';
+const SKILL_CATS=['戦闘技能','探索技能','行動技能','交渉技能','知識技能','その他'];
+let categoryOverrides={};
+try {categoryOverrides=JSON.parse(localStorage.getItem(CATEGORY_KEY)||'{}')||{}}catch(e){categoryOverrides={}}
+function saveCategoryOverrides(){try{localStorage.setItem(CATEGORY_KEY,JSON.stringify(categoryOverrides));return true}catch(e){alert('区分設定を保存できませんでした');return false}}
+function setSkillCategory(name,value){
+ if(value==='auto')delete categoryOverrides[name];else categoryOverrides[name]=value;
+ if(saveCategoryOverrides())categorySettingsPage();
+}
+function categorySettingsPage(){
+ const names=allSkillNames();
+ app.innerHTML=`<button class="btn" onclick="route('settings')">← 設定へ</button><h1>技能区分の編集</h1><p class="small">通常はCoC6版の基本区分で表示します。変更した技能だけ、ここで指定した区分を優先します。探索者の技能値は変わりません。</p><div class="panel"><label class="field"><span>技能名で絞り込み</span><input id="categoryFilter" placeholder="例：芸術" autocomplete="off"></label><div id="categoryRows"></div></div>`;
+ const input=document.getElementById('categoryFilter');
+ input.addEventListener('input',()=>drawCategoryRows(input.value));
+ drawCategoryRows('');
+}
+function drawCategoryRows(query){
+ const names=allSkillNames().filter(n=>n.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+ document.getElementById('categoryRows').innerHTML=names.map(name=>`<div style="padding:11px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span style="flex:1;min-width:100px">${esc(name)}</span><select style="width:auto;max-width:180px" data-skill="${esc(name)}"><option value="auto">基本区分に戻す</option>${SKILL_CATS.map(c=>`<option value="${esc(c)}" ${categoryOverrides[name]===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>`).join('')||'<p class="muted">該当する技能がありません</p>';
+ document.querySelectorAll('#categoryRows select').forEach(el=>el.addEventListener('change',()=>{const name=el.dataset.skill;if(el.value==='auto')delete categoryOverrides[name];else categoryOverrides[name]=el.value;saveCategoryOverrides()}));
+}
+let showInitialSkills=false; // 個別ページで初期値の技能も表示するか
+let hideLost=false;
+const LOST_TYPES={active:'現役',physical:'肉体ロスト',mental:'精神ロスト',insanity:'永久発狂',unspecified:'ロスト（種別未設定）'};
+function lostType(c){const t=c?.lostType;return Object.prototype.hasOwnProperty.call(LOST_TYPES,t)?t:(c?.lost?'unspecified':'active')}
+function isLost(c){return lostType(c)!=='active'}
+function lostLabel(c){return LOST_TYPES[lostType(c)]+(c.noReturn?' / 復帰不可':'')}
+function lostBadge(c){return isLost(c)?`<span class="lost-ribbon">${esc(lostLabel(c))}</span>`:(c.noReturn?'<span class="lost-ribbon">復帰不可</span>':'')}
+function updateLostControls(){const type=document.querySelector('[name="lostType"]')?.value;const box=document.getElementById('noReturnOption');if(box)box.style.opacity=type==='active'?'0.65':'1'}
+let galleryIndex=0,pendingGallery=[],viewGalleryIndex=0;
+let chars=[],view='list',selected=null,tab='profile',searchSkill='目星',minValue=0,onlyLearned=false,sortOrder='desc',editId=null;
+const LIST_PREF_KEY='jinbutsucho_list_preferences_v1';
+let listPrefs={activeFirst:true,sort:'name',desc:false};
+try{const stored=JSON.parse(localStorage.getItem(LIST_PREF_KEY)||'null');if(stored&&typeof stored==='object')listPrefs={...listPrefs,...stored}}catch(e){}
+const LIST_SORT_KEYS=['name','STR','CON','POW','DEX','APP','SIZ','INT','EDU'];
+if(!LIST_SORT_KEYS.includes(listPrefs.sort))listPrefs.sort='name';
+if(typeof listPrefs.activeFirst!=='boolean')listPrefs.activeFirst=true;
+if(typeof listPrefs.desc!=='boolean')listPrefs.desc=listPrefs.sort!=='name';
+function setListPref(key,value){
+ if(key==='sort'){
+   if(!LIST_SORT_KEYS.includes(value))return;
+   listPrefs.sort=value;
+   listPrefs.desc=value!=='name'; // 名前はあいうえお順、能力値は高い順
+ }else if(key==='activeFirst'||key==='desc'){
+   listPrefs[key]=!!value;
+ }else return;
+ try{localStorage.setItem(LIST_PREF_KEY,JSON.stringify(listPrefs))}catch(e){}
+ if(key==='sort')listPage();else filterCards();
+}
+function listValue(c,key){if(key==='name')return String(c.reading||c.name||'').trim();if(key==='job')return String(c.job||'');if(['アイデア','幸運','知識'].includes(key)){const stat={アイデア:'INT',幸運:'POW',知識:'EDU'}[key];const n=Number(c.stats?.[stat]);return c.stats?.[stat]==null||c.stats?.[stat]===''?null:n*5}if(key==='HP')return c.hp===''||c.hp==null?null:Number(c.hp);if(key==='MP')return c.mp===''||c.mp==null?null:Number(c.mp);if(key==='SAN')return c.san===''||c.san==null?null:Number(c.san);return c.stats?.[key]===''||c.stats?.[key]==null||!Number.isFinite(Number(c.stats[key]))?null:Number(c.stats[key])}
+function sortList(arr){const key=listPrefs.sort,dir=listPrefs.desc?-1:1;return arr.sort((a,b)=>{if(listPrefs.activeFirst&&!!a.inUse!==!!b.inUse)return a.inUse?-1:1;const va=listValue(a,key),vb=listValue(b,key);if(va==null&&vb!=null)return 1;if(vb==null&&va!=null)return -1;let diff=typeof va==='number'&&typeof vb==='number'?va-vb:String(va??'').localeCompare(String(vb??''),'ja',{numeric:true});return dir*diff||String(a.reading||a.name||'').localeCompare(String(b.reading||b.name||''),'ja')})}
+const app=document.getElementById('app');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function load(){try{const s=localStorage.getItem(KEY);if(s){const data=JSON.parse(s);if(Array.isArray(data)){chars=data;return}}}catch(e){alert('保存データを読み込めませんでした。空の状態で起動します。')}chars=[];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(chars));return true}catch(e){alert('保存できませんでした。画像容量やブラウザの保存制限をご確認ください。JSONバックアップも利用できます。');return false}}
+function route(v){view=v;render();window.scrollTo(0,0)}
+function setProfileInUse(value,input){const c=chars.find(x=>x.id===selected);if(!c)return;const old=c.inUse;c.inUse=value;if(!save()){c.inUse=old;input.checked=!!old;return;}detailPage()}
+function openChar(id){gachaReturnCharacterId=null;selected=id;tab='profile';showInitialSkills=false;viewGalleryIndex=0;route('detail')}
+// A fresh iframe for each session prevents the editor/test lifecycle from
+// leaving a stale frame or touch layer above the archive's buttons.
+let summonSession=0;
+let gachaReturnCharacterId=null;
+function openSummon(mode="play"){
+ const c=chars.find(x=>x.id===selected);
+ if(!c){alert('探索者が見つかりません');return}
+ const overlay=document.getElementById('summonIntegration');
+ const previous=document.getElementById('summonFrame');
+ if(previous)previous.remove();
+ const frame=document.createElement('iframe');
+ frame.id='summonFrame';
+ frame.title='探索者召喚';
+ frame.style.cssText='border:0;width:100%;height:100%;display:block';
+ overlay.insertBefore(frame,overlay.firstChild);
+ const imgs=galleryOf(c);
+ const idx=imgs.length?((viewGalleryIndex%imgs.length)+imgs.length)%imgs.length:0;
+ summonSession++;
+ overlay.classList.remove('hidden');
+ document.body.style.overflow='hidden';
+ frame.src='./summon.html?id='+encodeURIComponent(c.id)+'&portrait='+idx+'&mode='+encodeURIComponent(mode)+'&session='+summonSession+'&build=gacha-return-v3';
+}
+window.addEventListener('message',e=>{
+ const frame=document.getElementById('summonFrame');
+ if(e.source===frame?.contentWindow&&e.data?.type==='jinbutsucho-close-summon')closeSummon();
+});
+function closeSummon(){
+ const overlay=document.getElementById('summonIntegration');
+ // Hide synchronously, before tearing down the nested editor/ritual frames.
+ overlay.classList.add('hidden');
+ document.body.style.overflow='';
+ const frame=document.getElementById('summonFrame');
+ if(frame)frame.remove();
+ // Rebuild the archive detail controls after leaving a test session.
+ if(gachaReturnCharacterId){
+  const target=chars.find(c=>c.id===gachaReturnCharacterId);
+  gachaReturnCharacterId=null;
+  if(target){selected=target.id;tab='profile';showInitialSkills=false;viewGalleryIndex=0;route('detail');return;}
+ }
+ if(view==='detail')detailPage();
+}
+
+function summonLinkFor(id){const u=new URL('./index.html',location.href);u.search='';u.hash='';u.searchParams.set('summon',id);return u.href;}
+async function copySummonLink(){const c=chars.find(x=>x.id===selected);if(!c)return;const link=summonLinkFor(c.id);try{await navigator.clipboard.writeText(link);alert('召喚URLをコピーしました。NFCタグへの書き込みやQRコード作成に利用できます。')}catch(e){prompt('この召喚URLをコピーしてください',link)}}
+function showSummonQR(){
+ const c=chars.find(x=>x.id===selected);if(!c)return;
+ const url=summonLinkFor(c.id);
+ const imageUrl='https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data='+encodeURIComponent(url);
+ let box=document.getElementById('summonQRBox');
+ if(!box){box=document.createElement('div');box.id='summonQRBox';box.className='memory-gacha-overlay';document.body.appendChild(box)}
+ box.innerHTML=`<div class="memory-gacha-top"><b>✧ 探索者召喚 QR</b><button class="btn" onclick="closeSummonQR()">閉じる ×</button></div><div class="panel" style="max-width:500px;margin:auto;text-align:center"><h2>${esc(c.name||'探索者')}</h2><p class="small">この探索者を直接召喚するQRコード</p><img src="${esc(imageUrl)}" alt="${esc(c.name||'探索者')}の召喚用QRコード" style="width:min(80vw,320px);max-width:100%;aspect-ratio:1;background:white;padding:8px;border-radius:8px"><p class="small">QR画像の生成にはインターネット接続が必要です。読み取る端末にもこの探索者のデータが必要です。</p><button class="btn primary" onclick="copySummonLink()">🔗 NFC用URLをコピー</button></div>`;
+}
+function closeSummonQR(){document.getElementById('summonQRBox')?.remove()}
+async function shareSummonLink(){const c=chars.find(x=>x.id===selected);if(!c)return;const link=summonLinkFor(c.id);if(navigator.share){try{await navigator.share({title:(c.name||'探索者')+'の召喚',url:link});return}catch(e){if(e.name==='AbortError')return}}try{await navigator.clipboard.writeText(link);alert('召喚URLをコピーしました')}catch(e){prompt('召喚URL',link)}}
+function handleIncomingSummon(){const u=new URL(location.href),id=u.searchParams.get('summon');if(!id)return;u.searchParams.delete('summon');history.replaceState(null,'',u.pathname+u.search+u.hash);const c=chars.find(x=>x.id===id);if(!c){alert('この端末の人物帖に該当する探索者がいません。同じPWAに探索者を登録してください。');return}selected=c.id;tab='profile';viewGalleryIndex=0;view='detail';render();openSummon('play')}
+
+function memoryGachaLink(count=1,albumId=null){
+ const u=new URL('./index.html',location.href);
+ u.search='';u.hash='';
+ u.searchParams.set('memoryGacha',count===10?'10':'1');
+ if(albumId)u.searchParams.set('memoryAlbum',albumId);
+ return u.href;
+}
+async function memoryCopyGachaLink(count=1,albumId=null){
+ const link=memoryGachaLink(count,albumId);
+ try{await navigator.clipboard.writeText(link);alert('思い出ガチャのURLをコピーしました。NFCタグのURLとして登録できます。')}
+ catch(e){prompt('このURLをコピーしてください',link)}
+}
+function memoryShowGachaQR(count=1,albumId=null){
+ const url=memoryGachaLink(count,albumId);
+ let box=document.getElementById('memoryGachaQRBox');
+ if(!box){box=document.createElement('div');box.id='memoryGachaQRBox';box.className='memory-gacha-overlay';document.body.appendChild(box)}
+ // QR rendering service is used only for the code image; the URL itself
+ // always points to this PWA, not to the service.
+ const imageUrl='https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=12&data='+encodeURIComponent(url);
+ box.innerHTML=`<div class="memory-gacha-top"><b>✦ 思い出ガチャ QR</b><button class="btn" onclick="memoryCloseGachaQR()">閉じる ×</button></div>
+ <div class="panel" style="max-width:500px;margin:auto;text-align:center">
+ <p>${count===10?'10連':'1回'}ガチャ${albumId?'（指定アルバム）':''}</p>
+ <img alt="思い出ガチャ起動用QRコード" src="${esc(imageUrl)}" style="width:min(80vw,320px);max-width:100%;aspect-ratio:1;background:white;padding:8px;border-radius:8px">
+ <p class="small">読み取ると、この端末の人物帖で思い出ガチャを開始します。画像表示にはインターネット接続が必要です。</p>
+ <button class="btn primary" onclick="memoryCopyGachaLink(${count},${albumId?`decodeURIComponent('${memorySafeId(albumId)}')`:'null'})">URLをコピー（NFC用）</button>
+ </div>`;
+}
+function memoryCloseGachaQR(){document.getElementById('memoryGachaQRBox')?.remove()}
+async function handleIncomingMemoryGacha(){
+ const u=new URL(location.href),raw=u.searchParams.get('memoryGacha');
+ if(raw!=='1'&&raw!=='10')return;
+ const albumId=u.searchParams.get('memoryAlbum');
+ u.searchParams.delete('memoryGacha');u.searchParams.delete('memoryAlbum');
+ history.replaceState(null,'',u.pathname+u.search+u.hash);
+ view='gallery';memoryMode='all';memoryQuery='';memoryTag='';memoryCurrentAlbum=null;
+ render();
+ try{
+  await memoryReload();
+  if(albumId&&!memoryAlbum(albumId)){alert('指定されたアルバムが見つかりません。');return;}
+  memoryDrawGacha(Number(raw),albumId);
+ }catch(e){alert('思い出を読み込めませんでした：'+e.message)}
+}
+function activeNav(){document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['list','search','edit','gallery','settings'][i]===view||(view==='detail'&&i===0)))}
+function render(){activeNav();if(view==='list')listPage();else if(view==='detail')detailPage();else if(view==='search')searchPage();else if(view==='edit')editPage();else if(view==='gallery')galleryAlbumsPage();else settingsPage()}
+function listPage(){const sorts=[['name','名前（あいうえお順）'],...['STR','CON','POW','DEX','APP','SIZ','INT','EDU'].map(x=>[x,x])];app.innerHTML=`<div class="small">v1.6.4 / READING UPDATE / ${chars.length} RECORDS</div><h1>探索者たちの記録</h1><label class="field"><span>名前・職業・タグで検索</span><input id="nameFilter" placeholder="名前や職業で検索" oninput="filterCards()"></label><label class="lost-toggle"><input type="checkbox" ${hideLost?'checked':''} onchange="setHideLost(this.checked)">ロストした探索者を非表示（復帰不可のみは対象外）</label><div class="panel"><label class="lost-toggle"><input type="checkbox" ${listPrefs.activeFirst?'checked':''} onchange="setListPref('activeFirst',this.checked)">現行使用中の探索者を優先表示</label><label class="field"><span>並び替え</span><select onchange="setListPref('sort',this.value)">${sorts.map(([k,label])=>`<option value="${k}" ${listPrefs.sort===k?'selected':''}>${label}</option>`).join('')}</select></label><label class="lost-toggle"><input type="checkbox" ${listPrefs.desc?'checked':''} onchange="setListPref('desc',this.checked)">逆順（名前：ん→あ／能力値：低い順）</label></div><div class="grid" id="cards"></div>`;filterCards()}
+function setHideLost(value){hideLost=!!value;if(view==='list')filterCards();else if(view==='search')drawResults()}
+function filterCards(){const q=(document.getElementById('nameFilter')?.value||'').toLowerCase();let filtered=chars.filter(c=>(!hideLost||!isLost(c))&&[c.name,c.reading,c.job,c.tag,...getTags(c)].join(' ').toLowerCase().includes(q));document.getElementById('cards').innerHTML=sortList(filtered).map(c=>`<button class="card ${isLost(c)?'lost-card':''}" onclick="openChar(${JSON.stringify(c.id).replace(/"/g,'&quot;')})">${c.image?`<img src="${esc(c.image)}" alt="">`:`<div style="height:220px;display:grid;place-items:center;background:#ebe6df;color:#8c8277">NO IMAGE</div>`}<div class="info">${lostBadge(c)}${c.inUse?'<span class="pill" style="background:#e3f2e5;color:#245c38">使用中</span>':''}<span class="pill">${esc(c.job||'未設定')}</span><strong>${esc(c.name||'無名の探索者')}</strong><div class="small">${esc(c.reading||'')} / ${esc(c.age||'?')}歳</div></div></button>`).join('')||'<div class="empty">該当する探索者はいません。</div>'}
+function derivedRoll(value){if(value===null||value===undefined||value==='')return '—';const n=Number(value);return Number.isFinite(n)&&n>=0?String(n*5):'—'}
+function galleryOf(c){
+ const a=Array.isArray(c.images)?c.images.filter(x=>typeof x==='string'&&x.startsWith('data:image/')):[];
+ return a.length?a:(c.image?[c.image]:[]);
+}
+function galleryHtml(c){
+ const imgs=galleryOf(c);
+ if(!imgs.length)return '<div class="hero"><div class="empty">立ち絵未登録</div></div>';
+ const i=((viewGalleryIndex%imgs.length)+imgs.length)%imgs.length;
+ return `<div class="gallery-stage"><img src="${esc(imgs[i])}" alt="${esc(c.name)}の立ち絵 ${i+1}">${imgs.length>1?`<button type="button" class="gallery-arrow prev" aria-label="前の立ち絵" onclick="slideGallery(-1)">‹</button><button type="button" class="gallery-arrow next" aria-label="次の立ち絵" onclick="slideGallery(1)">›</button>`:''}</div>${imgs.length>1?`<div class="gallery-counter">${i+1} / ${imgs.length}　左右の矢印で差分を切り替え</div>`:''}`;
+}
+function slideGallery(step){const c=chars.find(x=>x.id===selected);if(!c)return;const n=galleryOf(c).length;if(!n)return;viewGalleryIndex=(viewGalleryIndex+step+n)%n;detailPage()}
+const MEMO_TYPES=['不定の狂気','アーティファクト','後遺症','その他'];
+function memoTypeOptions(current){return [...new Set([...MEMO_TYPES,current].filter(Boolean))].map(t=>`<option value="${esc(t)}" ${current===t?'selected':''}>${esc(t)}</option>`).join('')}
+function memoEditorRow(type='その他',body=''){
+ return `<div class="memo-edit-row"><label class="field"><span>メモの種類</span><select class="memoType">${memoTypeOptions(type)}</select></label><label class="field"><span>内容</span><textarea class="memoBody" placeholder="内容を入力">${esc(body)}</textarea></label><button type="button" class="btn danger" onclick="this.closest('.memo-edit-row').remove()">このメモを削除</button></div>`;
+}
+function addMemoRow(){document.getElementById('memoEditor')?.insertAdjacentHTML('beforeend',memoEditorRow())}
+function galleryEditorHtml(){
+ return pendingGallery.map((img,i)=>`<div class="gallery-edit-row"><img src="${esc(img)}" alt="立ち絵 ${i+1}"><span style="flex:1">差分 ${i+1}${i===0?'（一覧用）':''}</span><button type="button" class="btn" onclick="moveGalleryImage(${i},-1)" ${i===0?'disabled':''}>↑</button><button type="button" class="btn" onclick="moveGalleryImage(${i},1)" ${i===pendingGallery.length-1?'disabled':''}>↓</button><button type="button" class="btn danger" onclick="removeGalleryImage(${i})">削除</button></div>`).join('')||'<p class="small">画像未登録</p>';
+}
+function drawGalleryEditor(){const el=document.getElementById('galleryEditor');if(el)el.innerHTML=galleryEditorHtml()}
+function moveGalleryImage(i,dir){const j=i+dir;if(j<0||j>=pendingGallery.length)return;[pendingGallery[i],pendingGallery[j]]=[pendingGallery[j],pendingGallery[i]];drawGalleryEditor()}
+function removeGalleryImage(i){pendingGallery.splice(i,1);drawGalleryEditor()}
+async function addGalleryImages(event){
+ const files=Array.from(event.target.files||[]);
+ if(!files.length)return;
+ const status=document.getElementById('galleryStatus');
+ if(status)status.textContent='画像を読み込み中…';
+ try{
+  for(const f of files){
+   if(!f.type.startsWith('image/'))throw Error('画像以外のファイルが含まれています');
+   const data=await new Promise((resolve,reject)=>{
+    const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('ファイルを読み込めません'));r.readAsDataURL(f);
+   });
+   const converted=await new Promise((resolve,reject)=>{
+    const img=new Image();img.onload=()=>{
+     const scale=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));
+     const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+     canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
+     resolve(canvas.toDataURL('image/webp',.82));
+    };img.onerror=()=>reject(Error('画像を開けません'));img.src=data;
+   });
+   pendingGallery.push(converted);
+  }
+  drawGalleryEditor();
+  if(status)status.textContent=`${files.length}枚を追加しました。保存容量に注意してください。`;
+ }catch(err){if(status)status.textContent='読み込みエラー: '+err.message}
+ event.target.value='';
+}
+
+// 不定の狂気：元の能力値・技能値は書き換えず、表示用補正のみ算出する
+const MADNESS_TYPES={
+ dependence:{name:'依存',variants:['対象がある','対象がない'],description:'特定の物または行為への執着（人物指定不可）。',rules:'交渉4技能 -20。目星は対象あり -10、なし -15。'},
+ exhaustion:{name:'神経衰弱',variants:['人がいる場所','精神分析を受けた相手と二人きり','条件に該当しない'],description:'精神的疲労に伴う身体の衰弱・消耗。',rules:'人がいる場所では全技能 -20。指定された相手と二人きりなら -10。'},
+ phobia:{name:'恐怖症',variants:['恐怖対象がある','恐怖対象がない'],description:'特定の物・人物・行為への強い恐怖。',rules:'対象があるとき全技能 -10。身体を動かす技能は -20。'},
+ obsession:{name:'狂愛',variants:['通常'],description:'特定の人物への激しい愛情と第三者への拒絶。',rules:'INT -2、対象以外との交渉技能 -20。'},
+ eating:{name:'異常食症',variants:['過食','拒食','悪食'],description:'過食・拒食・悪食のいずれか。',rules:'探索技能 -10、アイデア -20。過食 POW -1／拒食 STR -1／悪食 CON -1。'},
+ sleeping:{name:'睡眠障害',variants:['不眠','過眠'],description:'不眠または過眠による日常生活への影響。',rules:'不眠 CON -1、探索技能 -10、アイデア -20。過眠 POW -1、戦闘技能 -10、アイデア -20。'},
+ illness:{name:'存在しない病',variants:['通常'],description:'存在しない病に侵されているという思い込み。',rules:'POW -1、EDU -1、知識系技能 -20。'},
+ amnesia:{name:'健忘症',variants:['通常'],description:'過去の体験や出来事に関する記憶の欠落。',rules:'アイデア -30、知識 -30。'},
+ hallucination:{name:'幻覚・幻聴',variants:['幻覚','幻聴','両方'],description:'日常的な幻覚・幻聴。',rules:'セッション開始時 SAN 1/1d3。幻覚は目星失敗時、幻聴は聞き耳失敗時 SAN 0/1（自動減算なし）。'},
+ selfharm:{name:'自傷癖',variants:['首元','手・足','頭・胴'],description:'強い不安を覚えた際、自傷行為で安堵を得る。',rules:'SANC失敗時 HP -1。首元 交渉系 -20／手・足 行動系 -20／頭・胴 探索系 -20（HP自動減算なし）。'}
+};
+const MADNESS_CATEGORIES={
+ '戦闘技能':['回避','キック','組み付き','こぶし','頭突き','投擲','マーシャルアーツ','拳銃','サブマシンガン','ショットガン','マシンガン','ライフル','杖','日本刀','刀','剣','ナイフ','槍','斧','弓','武道'],
+ '探索技能':['応急手当','鍵開け','隠す','隠れる','聞き耳','忍び歩き','写真術','精神分析','追跡','登攀','図書館','目星'],
+ '行動技能':['運転','機械修理','重機械操作','乗馬','水泳','製作','操縦','跳躍','電気修理','ナビゲート','変装'],
+ '交渉技能':['言いくるめ','信用','説得','値切り','母国語','ほかの言語','他の言語','外国語'],
+ '知識技能':['医学','オカルト','化学','クトゥルフ神話','芸術','経理','考古学','コンピューター','心理学','人類学','生物学','地質学','電子工学','天文学','博物学','物理学','法律','薬学','歴史']
+};
+function madnessCategory(name,skill){
+ const custom=categoryOverrides[name]||skill?.category;
+ if(custom){const c=String(custom);if(MADNESS_CATEGORIES[c])return c;if(MADNESS_CATEGORIES[c+'技能'])return c+'技能';}
+ const n=String(name).replace(/[\s　]/g,'').replace(/[（(].*?[）)]/g,'');
+ for(const [cat,names] of Object.entries(MADNESS_CATEGORIES)){if(names.some(x=>n===x||n.startsWith(x+'：')||n.startsWith(x+':')))return cat}
+ return 'その他';
+}
+function madnessEntries(c){return Array.isArray(c.madness)?c.madness.filter(x=>x&&MADNESS_TYPES[x.type]):[]}
+function madnessActive(c){return madnessEntries(c).filter(x=>x.status!=='cured'&&x.apply===true)}
+function madnessModifiers(c){
+ const result={stats:{},rolls:{},skills:{}},active=madnessActive(c);
+ const stat=(k,n)=>result.stats[k]=(result.stats[k]||0)+n;
+ const roll=(k,n)=>result.rolls[k]=(result.rolls[k]||0)+n;
+ const skill=(k,n)=>result.skills[k]=(result.skills[k]||0)+n;
+ const group=(cat,n,excluded=[])=>{for(const [k,v] of Object.entries(c.skills||{}))if(madnessCategory(k,v)===cat&&!excluded.includes(k))skill(k,n)};
+ const all=(n)=>{for(const k of Object.keys(c.skills||{}))skill(k,n)};
+ for(const m of active){
+  const v=m.variant||'';
+  switch(m.type){
+   case 'dependence':for(const k of ['言いくるめ','説得','信用','値切り'])skill(k,-20);skill('目星',v==='対象がない'?-15:-10);break;
+   case 'exhaustion':if(v==='人がいる場所')all(-20);if(v==='精神分析を受けた相手と二人きり')all(-10);break;
+   case 'phobia':if(v==='恐怖対象がある'){all(-10);group('戦闘技能',-10);group('行動技能',-10)}break; // 身体を動かす技能の暫定判定
+   case 'obsession':stat('INT',-2);if(m.conditionActive)group('交渉技能',-20);break;
+   case 'eating':group('探索技能',-10);roll('アイデア',-20);stat(v==='拒食'?'STR':v==='悪食'?'CON':'POW',-1);break;
+   case 'sleeping':stat(v==='過眠'?'POW':'CON',-1);group(v==='過眠'?'戦闘技能':'探索技能',-10);roll('アイデア',-20);break;
+   case 'illness':stat('POW',-1);stat('EDU',-1);group('知識技能',-20);break;
+   case 'amnesia':roll('アイデア',-30);roll('知識',-30);break;
+   case 'selfharm':group(v==='首元'?'交渉技能':v==='手・足'?'行動技能':'探索技能',-20);break;
+  }
+ }
+ return result;
+}
+function madnessStatDisplay(c,key){const n=c.stats?.[key],mod=madnessModifiers(c).stats[key]||0;if(n===''||n==null||!Number.isFinite(Number(n)))return '—';return `${Number(n)+mod}${mod?` <small class="madness-delta">(${mod})</small>`:''}`}
+function madnessRollDisplay(c,label,key){const n=c.stats?.[key];if(n===''||n==null||!Number.isFinite(Number(n)))return '—';const mods=madnessModifiers(c);const statmod=mods.stats[key]||0,rollmod=mods.rolls[label]||0;const val=(Number(n)+statmod)*5+rollmod;return `${val}${statmod||rollmod?` <small class="madness-delta">(${statmod*5+rollmod})</small>`:''}`}
+function madnessSkillDisplay(c,name,v){const raw=v?.value;if(raw===''||raw===null||raw===undefined)return '—';const n=Number(raw);if(!Number.isFinite(n))return esc(raw);const d=madnessModifiers(c).skills[name]||0;return `${n+d}${d?` <small class="madness-delta">(${d})</small>`:''}`}
+function madnessTypeOptions(type){return Object.entries(MADNESS_TYPES).map(([id,r])=>`<option value="${id}" ${type===id?'selected':''}>${esc(r.name)}</option>`).join('')}
+function madnessRow(m={type:'dependence',variant:'対象がある',status:'active',apply:false,conditionActive:false,target:'',duration:'',notes:''}){
+ const r=MADNESS_TYPES[m.type]||MADNESS_TYPES.dependence;
+ return `<div class="madness-edit-row memo-edit-row"><label class="field"><span>不定の種類</span><select class="mad-type" onchange="madnessTypeChanged(this)">${madnessTypeOptions(m.type)}</select></label><label class="field"><span>条件・症状</span><select class="mad-variant">${r.variants.map(v=>`<option value="${esc(v)}" ${m.variant===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label><label class="field"><span>対象・詳細</span><input class="mad-target" value="${esc(m.target||'')}" placeholder="依存対象・恐怖対象など"></label><label class="field"><span>発症期間</span><input class="mad-duration" value="${esc(m.duration||'')}" placeholder="例：残り2セッション"></label><label class="field"><span>状態</span><select class="mad-status"><option value="active" ${m.status!=='cured'?'selected':''}>継続中</option><option value="cured" ${m.status==='cured'?'selected':''}>治癒済み</option></select></label><label class="lost-toggle"><input class="mad-apply" type="checkbox" ${m.apply?'checked':''}>技能・判定値への補正を反映</label><label class="lost-toggle"><input class="mad-condition" type="checkbox" ${m.conditionActive?'checked':''}>狂愛：対象以外との交渉中（該当時のみON）</label><label class="field"><span>補足メモ</span><textarea class="mad-notes">${esc(m.notes||'')}</textarea></label><div class="notice mad-rules">${esc(r.rules)}</div><button type="button" class="btn danger" onclick="this.closest('.madness-edit-row').remove()">この不定を削除</button></div>`;
+}
+function madnessTypeChanged(sel){const row=sel.closest('.madness-edit-row'),r=MADNESS_TYPES[sel.value];row.querySelector('.mad-variant').innerHTML=r.variants.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');row.querySelector('.mad-rules').textContent=r.rules}
+function addMadnessRow(){document.getElementById('madnessEditor')?.insertAdjacentHTML('beforeend',madnessRow())}
+function readMadnessEditor(){return [...document.querySelectorAll('.madness-edit-row')].map(row=>({
+ type:row.querySelector('.mad-type').value,variant:row.querySelector('.mad-variant').value,
+ target:row.querySelector('.mad-target').value,duration:row.querySelector('.mad-duration').value,
+ status:row.querySelector('.mad-status').value,apply:row.querySelector('.mad-apply').checked,
+ conditionActive:row.querySelector('.mad-condition').checked,notes:row.querySelector('.mad-notes').value
+}))}
+function madnessRecordHtml(c){
+ const entries=madnessEntries(c);
+ if(!entries.length)return '<p class="muted">不定の狂気は未登録です。</p>';
+ return entries.map(m=>{const r=MADNESS_TYPES[m.type];return `<div class="madness-record"><b>${esc(r.name)}</b> <span class="pill">${m.status==='cured'?'治癒済み':'継続中'}</span> <span class="pill">${m.apply&&m.status!=='cured'?'補正ON':'補正OFF'}</span><p>${esc(m.variant||'')} ${esc(m.target||'')}</p>${m.duration?`<p class="small">期間：${esc(m.duration)}</p>`:''}<p class="small">${esc(r.description)}</p><p class="notice">${esc(r.rules)}</p>${m.notes?`<p style="white-space:pre-wrap">${esc(m.notes)}</p>`:''}</div>`}).join('');
+}
+
+function detailPage(){let c=chars.find(x=>x.id===selected);if(!c){route('list');return}let s=c.stats||{};if(tab==='status')tab='profile';app.innerHTML=`<button class="btn" onclick="route('list')">← 一覧へ</button><div style="margin-top:15px" class="small">INVESTIGATOR FILE ${isLost(c)?' / LOST':''}</div>${lostBadge(c)}<h1 style="margin:6px 0">${esc(c.name)}</h1><div class="small">${esc(c.reading)}　/　${esc(c.job)}</div><div style="margin-top:16px">${galleryHtml(c)}</div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="openSummon('play')">✧ この探索者を召喚する</button><button class="btn" onclick="openSummon('edit')">⚙ 召喚カードを編集</button></div><details class="panel" style="margin-top:12px"><summary style="cursor:pointer;font-weight:700">📱 NFC・QRで直接召喚</summary><p class="small">この探索者専用のQRコードを表示したり、NFCタグ用のURLをコピーしたりできます。同じ端末の人物帖で開くと召喚が始まります。</p><div class="actions"><button class="btn primary" onclick="showSummonQR()">▦ QRコードを表示</button><button class="btn" onclick="copySummonLink()">🔗 召喚URLをコピー</button><button class="btn" onclick="shareSummonLink()">共有する</button></div></details><div class="tabs">${['profile','skills','record'].map((t,i)=>`<button class="btn ${tab===t?'primary':''}" onclick="tab='${t}';detailPage()">${['PROFILE','SKILLS','RECORD'][i]}</button>`).join('')}</div><div id="detailContent" class="panel"></div><div class="actions"><button class="btn" onclick="chooseEdit(${JSON.stringify(c.id).replace(/"/g,'&quot;')})">✎ この探索者を編集</button></div>`;
+let body='';if(tab==='status')tab='profile';if(tab==='profile')body=`<label class="lost-toggle" style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><input type="checkbox" ${c.inUse?'checked':''} onchange="setProfileInUse(this.checked,this)"><span>現在使用中の探索者</span></label><div class="two"><div><div class="small">AGE</div><h2>${esc(c.age||'—')} 歳</h2></div><div><div class="small">HEIGHT</div><h2>${esc(c.height||'—')} cm</h2></div></div><p><span class="pill">${esc(c.tag?'#'+c.tag:'タグなし')}</span></p><h2>職業タグ</h2><p>${getTags(c).map(t=>`<span class="pill" style="margin:3px">${esc(t)}</span>`).join('')||'未登録'}</p><h2>能力値</h2><div class="stats">${['STR','CON','POW','DEX','APP','SIZ','INT','EDU'].map(k=>`<div class="stat"><div class="small">${k}</div><b>${madnessStatDisplay(c,k)}</b></div>`).join('')}</div><h2 style="margin:20px 0 10px">判定値</h2><div class="stats" style="grid-template-columns:repeat(3,minmax(0,1fr))">${[['アイデア','INT'],['幸運','POW'],['知識','EDU']].map(([label,key])=>`<div class="stat"><div class="small">${label}</div><b>${madnessRollDisplay(c,label,key)}</b></div>`).join('')}</div><p>HP ${esc(c.hp??'—')}　/　MP ${esc(c.mp??'—')}　/　SAN ${esc(c.san??'—')} / ${esc(c.sanMax??'—')}</p><h2>人物紹介</h2><p style="white-space:pre-wrap">${esc(c.bio||'紹介文はまだありません。')}</p>`;
+if(tab==='skills')body=`<label class="initial-skill-toggle" style="display:flex;align-items:center;gap:10px;padding:12px 0;margin-bottom:10px;cursor:pointer"><input type="checkbox" ${showInitialSkills?'checked':''} onchange="showInitialSkills=this.checked;detailPage()" style="width:20px;height:20px;accent-color:var(--accent)"><span>初期値の技能も表示</span></label>`+renderGroupedCharacterSkills(c.skills||{},showInitialSkills,c);
+if(tab==='record')body=`<h2>通過シナリオ</h2>${(c.scenarios||[]).length?`<ul>${c.scenarios.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p class="muted">記録なし</p>'}<h2>経歴・メモ</h2><p style="white-space:pre-wrap">${esc(c.story||'未登録')}</p><h2>不定の狂気</h2>${madnessRecordHtml(c)}<h2>追加メモ</h2>${(c.extraMemos||[]).length?(c.extraMemos||[]).map(m=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><b>${esc(m.type||'その他')}</b><p style="white-space:pre-wrap">${esc(m.body||'')}</p></div>`).join(''):'<p class="muted">追加メモなし</p>'}<details><summary>ネタバレ・秘匿メモを表示</summary><p style="white-space:pre-wrap">${esc(c.spoiler||'未登録')}</p><p class="notice">これは表示を隠すだけの機能です。パスワードによる暗号化ではありません。</p></details>`;
+document.getElementById('detailContent').innerHTML=body;memoryCharacterSection(c.id)}
+
+// 個別ページの技能はキャラシの区分に従ってグループ表示する。
+// 未分類や独自技能も削除せず「その他」に表示する。
+function renderGroupedCharacterSkills(skills,includeInitial=false,character=null){
+ const allEntries=Object.entries(skills||{});
+ if(!allEntries.length)return '<p class="muted">技能未登録</p>';
+ // 初期値が記録されている場合だけ比較する。初期値不明の独自技能は隠さない。
+ const entries=includeInitial?allEntries:allEntries.filter(([name,v])=>{
+  const value=Number(v&&v.value),base=Number(v&&v.base);
+  return v==null||v.base==null||v.base===''||!Number.isFinite(value)||!Number.isFinite(base)||value!==base;
+ });
+ if(!entries.length)return '<p class="muted">初期値を超える技能はありません。「初期値の技能も表示」にチェックを入れるとすべて確認できます。</p>';
+ const standard=['戦闘技能','探索技能','行動技能','交渉技能','知識技能'];
+ const normalize=cat=>{
+  const t=String(cat||'').trim();
+  if(!t)return 'その他';
+  const found=standard.find(x=>t===x||t===x.replace('技能','')||t===x.replace('技能','系'));
+  return found||t;
+ };
+ const skillGroups={
+  '戦闘技能':['回避','キック','組み付き','こぶし','こぶし（パンチ）','頭突き','投擲','マーシャルアーツ','拳銃','サブマシンガン','ショットガン','マシンガン','ライフル','杖','日本刀','刀','剣','ナイフ','槍','斧','弓','武道'],
+  '探索技能':['応急手当','鍵開け','隠す','隠れる','聞き耳','忍び歩き','写真術','精神分析','追跡','登攀','図書館','目星'],
+  '行動技能':['運転','機械修理','重機械操作','乗馬','水泳','製作','操縦','跳躍','電気修理','ナビゲート','変装'],
+  '交渉技能':['言いくるめ','信用','説得','値切り','母国語','ほかの言語','他の言語','外国語'],
+  '知識技能':['医学','オカルト','化学','クトゥルフ神話','芸術','経理','考古学','コンピューター','心理学','人類学','生物学','地質学','電子工学','天文学','博物学','物理学','法律','薬学','歴史']
+ };
+ function inferCategory(name){
+  const n=String(name).replace(/[\s　]/g,'').replace(/[（(].*?[）)]/g,'');
+  for(const [cat,items] of Object.entries(skillGroups)){
+   if(items.some(x=>n===x||n.startsWith(x+'：')||n.startsWith(x+':')))return cat;
+  }
+  return 'その他';
+ }
+ const groups=new Map();
+ entries.forEach(([name,v])=>{
+  const cat=normalize(v&&v.category)||'その他';
+  const resolved=categoryOverrides[name]|| (cat==='その他'?inferCategory(name):cat);
+  if(!groups.has(resolved))groups.set(resolved,[]);
+  groups.get(resolved).push([name,v||{}]);
+ });
+ const cats=[...groups.keys()].sort((a,b)=>{
+  const ia=standard.indexOf(a),ib=standard.indexOf(b);
+  return (ia<0?99:ia)-(ib<0?99:ib)||a.localeCompare(b,'ja');
+ });
+ return cats.map(cat=>`<section class="skill-category"><h3 class="skill-category-title">${esc(cat)} <span class="small">${groups.get(cat).length}件</span></h3>${groups.get(cat).sort((a,b)=>a[0].localeCompare(b[0],'ja')).map(([name,v])=>`<div class="skillrow"><div class="line"><span>${esc(name)}</span><b>${character?madnessSkillDisplay(character,name,v):esc(v.value??'—')}%</b></div><div class="bar"><div style="width:${Math.max(0,Math.min(100,+v.value||0))}%"></div></div></div>`).join('')}</section>`).join('');
+}
+function allSkillNames(){return [...new Set(chars.flatMap(c=>Object.keys(c.skills||{})))].sort((a,b)=>a.localeCompare(b,'ja'))}
+function allJobTags(){return [...new Set(chars.flatMap(c=>getTags(c)))].sort((a,b)=>a.localeCompare(b,'ja'))}
+function getTags(c){return Array.isArray(c.jobTags)?c.jobTags:(typeof c.jobTags==='string'?c.jobTags.split(/[,、\n]/).map(x=>x.trim()).filter(Boolean):[])}
+function setCondition(i,key,val){conditions[i][key]=key==='min'?Math.max(0,Math.min(100,Number(val)||0)):key==='aboveBase'?Boolean(val):val;if(key==='min'){const out=document.getElementById('minLabel'+i);if(out)out.textContent=conditions[i].min+'%';const n=document.getElementById('minNumber'+i);if(n&&Number(n.value)!==conditions[i].min)n.value=conditions[i].min;const slider=document.getElementById('minSlider'+i);if(slider&&Number(slider.value)!==conditions[i].min)slider.value=conditions[i].min;}drawResults()}
+function addCondition(){conditions.push({skill:orderedSkillNames()[0]||'目星',min:50,aboveBase:false});searchPage()}
+function removeCondition(i){if(conditions.length===1)return;conditions.splice(i,1);searchPage()}
+function searchPage(){let names=orderedSkillNames();conditions.forEach(c=>{if(!names.includes(c.skill))c.skill=names[0]||''});let jobs=[...new Set(chars.map(c=>c.job).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));let tags=allJobTags();app.innerHTML=`<div class="small">ADVANCED INVESTIGATOR SEARCH</div><h1>探索者・詳細検索</h1><div class="panel"><h2>技能条件</h2><p class="small">「＋条件を追加」でいくつでも増やせます。</p><div id="conditions">${conditions.map((c,i)=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div class="small">条件 ${i+1}</div><div class="two"><label class="field"><span>技能</span><button type="button" class="btn" style="width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center" onclick="openSkillPicker(${i})"><span>${esc(c.skill||'技能を選択')}</span><span>⌕ ▾</span></button></label></div><div class="threshold"><div class="threshold-head"><label for="minSlider${i}">最低技能値</label><strong id="minLabel${i}">${c.min}%</strong></div><input id="minSlider${i}" aria-label="最低技能値スライダー" type="range" min="0" max="100" step="1" value="${c.min}" oninput="setCondition(${i},'min',this.value)"><div class="threshold-foot"><span>0%</span><label>数値入力 <input id="minNumber${i}" aria-label="最低技能値を数値入力" type="number" min="0" max="100" value="${c.min}" oninput="setCondition(${i},'min',this.value)"></label><span>100%</span></div><label class="base-check"><input type="checkbox" ${c.aboveBase?'checked':''} onchange="setCondition(${i},'aboveBase',this.checked)"><span>初期値より高い探索者のみ</span></label><div class="small">チェック時は、設定した最低値に加えて、その技能の初期値（キャラシの base）を超える探索者を検索します。</div></div>${conditions.length>1?`<button class="btn danger" onclick="removeCondition(${i})">この条件を削除</button>`:''}</div>`).join('')}</div><button class="btn" style="margin-top:12px" onclick="addCondition()">＋ 条件を追加</button><label class="field"><span>条件の組み合わせ</span><select onchange="conditionMode=this.value;drawResults()"><option value="and" ${conditionMode==='and'?'selected':''}>AND：すべて満たす</option><option value="or" ${conditionMode==='or'?'selected':''}>OR：どれかを満たす</option></select></label></div><div class="panel"><h2>職業・タグ</h2><label class="field"><span>職業で絞り込む</span><select onchange="jobFilter=this.value;drawResults()"><option value="">すべての職業</option>${jobs.map(j=>`<option value="${esc(j)}" ${jobFilter===j?'selected':''}>${esc(j)}</option>`).join('')}</select></label><label class="field"><span>職業タグで絞り込む</span><select onchange="tagFilter=this.value;drawResults()"><option value="">すべてのタグ</option>${tags.map(t=>`<option value="${esc(t)}" ${tagFilter===t?'selected':''}>${esc(t)}</option>`).join('')}</select></label><p class="small">タグは探索者の編集画面で自由に追加できます（例：警察関係、医療関係、公務員）。</p><label class="field"><span>並び順</span><select onchange="advancedSort=this.value;drawResults()"><option value="skill-desc" ${advancedSort==='skill-desc'?'selected':''}>条件1の技能が高い順</option><option value="skill-asc" ${advancedSort==='skill-asc'?'selected':''}>条件1の技能が低い順</option><option value="job" ${advancedSort==='job'?'selected':''}>職業順</option><option value="name" ${advancedSort==='name'?'selected':''}>名前順</option></select></label></div><label class="lost-toggle"><input type="checkbox" ${hideLost?'checked':''} onchange="setHideLost(this.checked)">ロストした探索者を検索結果から除外</label><div id="results"></div><div id="skillPickerHost"></div>`;drawResults()}
+
+function openSkillPicker(i){skillPickerIndex=i;skillPickerQuery='';renderSkillPicker()}
+function closeSkillPicker(){skillPickerIndex=null;const el=document.getElementById('skillPickerHost');if(el)el.innerHTML=''}
+function toggleSkillFavorite(name){const a=skillPrefs.favorites;skillPrefs.favorites=a.includes(name)?a.filter(x=>x!==name):[...a,name];saveSkillPrefs();renderSkillPicker()}
+function moveSkill(name,direction){const names=orderedSkillNames();const group=names.filter(n=>skillPrefs.favorites.includes(n)===skillPrefs.favorites.includes(name));let i=group.indexOf(name),j=i+direction;if(j<0||j>=group.length)return;[group[i],group[j]]=[group[j],group[i]];const other=names.filter(n=>skillPrefs.favorites.includes(n)!==skillPrefs.favorites.includes(name));skillPrefs.order=skillPrefs.favorites.includes(name)?[...group,...other]:[...other,...group];saveSkillPrefs();renderSkillPicker()}
+function selectPickerSkill(name){if(skillPickerIndex===null)return;conditions[skillPickerIndex].skill=name;closeSkillPicker();searchPage()}
+function setSkillPickerQuery(value){skillPickerQuery=value;updateSkillPickerList()}
+function updateSkillPickerList(){const list=document.getElementById("skillPickerList");if(!list)return;const filtered=orderedSkillNames().filter(n=>n.toLocaleLowerCase("ja").includes(skillPickerQuery.toLocaleLowerCase("ja")));list.innerHTML=skillPickerRows(filtered)}
+function skillPickerRows(filtered){return filtered.map(n=>`<div class="skill-pick-row"><button class="btn ${skillPrefs.favorites.includes(n)?'primary':''}" style="padding:8px" onclick="toggleSkillFavorite(decodeURIComponent('${encodeURIComponent(n)}'))" aria-label="お気に入り切替">${skillPrefs.favorites.includes(n)?'★':'☆'}</button><button class="skill-pick-name" onclick="selectPickerSkill(decodeURIComponent('${encodeURIComponent(n)}'))">${esc(n)}</button><button class="btn" style="padding:8px" onclick="moveSkill(decodeURIComponent('${encodeURIComponent(n)}'),-1)" aria-label="上へ">↑</button><button class="btn" style="padding:8px" onclick="moveSkill(decodeURIComponent('${encodeURIComponent(n)}'),1)" aria-label="下へ">↓</button></div>`).join('')||'<p class="small">該当する技能がありません</p>'}
+function renderSkillPicker(keepFocus=false){const host=document.getElementById('skillPickerHost');if(!host||skillPickerIndex===null)return;const all=orderedSkillNames();const filtered=all.filter(n=>n.toLocaleLowerCase('ja').includes(skillPickerQuery.toLocaleLowerCase('ja')));host.innerHTML=`<div class="skill-overlay" onclick="if(event.target===this)closeSkillPicker()"><div class="skill-dialog" role="dialog" aria-modal="true" aria-label="技能を選ぶ"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2 style="margin:0">技能を選ぶ</h2><button class="btn" onclick="closeSkillPicker()">閉じる ×</button></div><p class="small">★ お気に入りは先頭へ。↑↓で表示順を変更できます。</p><input id="skillPickerSearch" class="skill-query" placeholder="技能名を入力して検索（例：心理）" value="${esc(skillPickerQuery)}" oninput="setSkillPickerQuery(this.value)"><div id="skillPickerList" class="skill-picker-list">${skillPickerRows(filtered)}</div><p class="small">表示順はこのブラウザに保存されます。検索結果や技能値は変更されません。</p></div></div>`;if(keepFocus){const input=document.getElementById('skillPickerSearch');input?.focus();input?.setSelectionRange(input.value.length,input.value.length)}}
+
+function matchingSearchCharacters(){return chars.filter(c=>{if(hideLost&&isLost(c))return false;if(jobFilter&&c.job!==jobFilter)return false;if(tagFilter&&!getTags(c).includes(tagFilter))return false;let checks=conditions.map(k=>{const data=c.skills?.[k.skill];if(!data)return false;const val=Number(data.value);if(!Number.isFinite(val)||val<k.min)return false;if(k.aboveBase){const base=Number(data.base);return Number.isFinite(base)&&val>base;}return true;});return conditionMode==='and'?checks.every(Boolean):checks.some(Boolean)});}
+function randomSummonFromSearch(){
+ const candidates=matchingSearchCharacters();
+ if(!candidates.length){alert('検索条件に一致する探索者がいません。');return;}
+ // Use unbiased browser random when available; fallback for older browsers.
+ let n;
+ if(globalThis.crypto?.getRandomValues){
+  const a=new Uint32Array(1),limit=Math.floor(4294967296/candidates.length)*candidates.length;
+  do{crypto.getRandomValues(a);n=a[0]}while(n>=limit);
+  n%=candidates.length;
+ }else n=Math.floor(Math.random()*candidates.length);
+ const c=candidates[n];
+ gachaReturnCharacterId=c.id;
+ selected=c.id;tab='profile';showInitialSkills=false;viewGalleryIndex=0;
+ // Prepare the selected investigator's detail page behind the summon overlay.
+ // Closing the summon will therefore return here, not to the search results.
+ route('detail');
+ openSummon('play');
+}
+function drawResults(){let arr=matchingSearchCharacters();let first=conditions[0]?.skill;arr.sort((a,b)=>advancedSort==='name'?a.name.localeCompare(b.name,'ja'):advancedSort==='job'?(a.job||'').localeCompare(b.job||'','ja')||a.name.localeCompare(b.name,'ja'):(advancedSort==='skill-asc'?1:-1)*((Number(a.skills?.[first]?.value)||0)-(Number(b.skills?.[first]?.value)||0)));document.getElementById('results').innerHTML=`<div class="small">検索結果 ${arr.length} / ${chars.length} 人</div><div class="panel" style="margin-top:12px"><h2 style="margin-top:0">✦ 条件からランダム召喚</h2><p class="small">現在の検索結果 ${arr.length} 人から、1人を同じ確率で選び、いつもの召喚演出で登場させます。</p><button class="btn primary" style="width:100%;padding:15px" ${arr.length?'':'disabled'} onclick="randomSummonFromSearch()">✦ ${arr.length}人からガチャを引く</button>${arr.length?'':'<p class="small">条件に一致する探索者がいないため、召喚できません。</p>'}</div><div class="panel">${arr.map((c,i)=>`<div class="rank" onclick="openChar(${JSON.stringify(c.id).replace(/"/g,'&quot;')})"><div class="num">${i+1}</div><div class="who"><b>${esc(c.name)}</b> ${isLost(c)?'<span class="lost-ribbon">LOST</span>':''}<div class="small">${esc(c.job||'職業未設定')}　${getTags(c).map(t=>`<span class="pill">${esc(t)}</span>`).join(' ')}</div><div class="small">${conditions.map(k=>`${esc(k.skill)} ${esc(c.skills?.[k.skill]?.value??'—')}%${k.aboveBase?'（初期値超過）':''}`).join(' / ')}</div></div></div>`).join('')||'<div class="empty">条件に一致する探索者はいません。</div>'}</div>`}
+function newCharacter(){window.pendingImage=null;editId='__new__';route('edit')}
+
+// 読み仮名が末尾にある場合だけ分離。既存の読みは上書きしない。
+function splitNameReading(raw){
+ const original=String(raw||'').trim();
+ const m=original.match(/^(.*?)\s*[（(]([ぁ-ゖァ-ヿー・･\s　]+)[）)]\s*$/u);
+ if(!m||!m[1].trim()||!/[ぁ-ゖァ-ヿ]/u.test(m[2]))return null;
+ return {name:m[1].trim(),reading:m[2].trim()};
+}
+function applySplitToFields(nameInput,readingInput){
+ if(!nameInput||!readingInput)return false;
+ const parsed=splitNameReading(nameInput.value);
+ if(!parsed||readingInput.value.trim()&&readingInput.value.trim()!==parsed.reading)return false;
+ nameInput.value=parsed.name;readingInput.value=parsed.reading;return true;
+}
+function splitEditorReading(){const f=document.getElementById('editor');if(f)applySplitToFields(f.elements.namedItem('name'),f.elements.namedItem('reading'))}
+function readingCleanupPage(){
+ const candidates=chars.map(c=>({c,parsed:splitNameReading(c.name)})).filter(x=>x.parsed);
+ app.innerHTML=`<button class="btn" onclick="route('settings')">← 保存・設定へ</button><h1>ふりがなの一括整理</h1><p class="notice">保存前にJSONバックアップを作成してください。すでに異なる読みが登録されている探索者は変更しません。</p><div class="panel"><h2>変更候補：${candidates.length}人</h2>${candidates.map(({c,parsed})=>{const conflict=!!String(c.reading||'').trim()&&String(c.reading).trim()!==parsed.reading;return `<label class="lost-toggle"><input type="checkbox" class="reading-candidate" value="${esc(c.id)}" ${conflict?'disabled':'checked'}><span><b>${esc(c.name)}</b><br><span class="small">名前：${esc(parsed.name)} / 読み：${esc(parsed.reading)}${conflict?'（登録済みの読みと異なるため保留）':''}</span></span></label>`}).join('')||'<p class="small">整理できる名前はありません。</p>'}<button class="btn primary" onclick="commitReadingCleanup()" ${candidates.some(x=>!x.c.reading||String(x.c.reading).trim()===x.parsed.reading)?'':'disabled'}>チェックした探索者を整理して保存</button></div>`;
+}
+function commitReadingCleanup(){
+ const ids=new Set([...document.querySelectorAll('.reading-candidate:checked')].map(el=>el.value));
+ const changes=chars.filter(c=>ids.has(c.id)).map(c=>({c,parsed:splitNameReading(c.name)})).filter(x=>x.parsed&&(!String(x.c.reading||'').trim()||String(x.c.reading).trim()===x.parsed.reading));
+ if(!changes.length)return alert('変更対象がありません');
+ if(!confirm(`${changes.length}人の名前と読みを整理して保存しますか？`))return;
+ const before=structuredClone(chars);
+ for(const {c,parsed} of changes){c.name=parsed.name;c.reading=parsed.reading}
+ if(!save()){chars=before;return}alert(`${changes.length}人を整理しました`);readingCleanupPage();
+}
+
+function chooseEdit(id){window.pendingImage=null;pendingGallery=[];editId=id;route('edit')}
+function editPage(){if(editId===null){app.innerHTML=`<div class="small">CHARACTER MANAGEMENT</div><h1>探索者を選んで編集</h1><p class="small">編集したい探索者をタップしてください。</p><button class="btn primary" onclick="newCharacter()">＋ 新しい探索者を追加</button> <button class="btn" onclick="bulkImportPage()">複数TXTから一括登録</button><div class="panel">${chars.map(c=>`<button class="btn" style="display:flex;align-items:center;width:100%;gap:12px;text-align:left;margin:8px 0" onclick="chooseEdit(${JSON.stringify(c.id).replace(/"/g,'&quot;')})">${c.image?`<img src="${esc(c.image)}" style="width:48px;height:60px;object-fit:contain;background:#eee9e3;border-radius:6px">`:''}<span><b>${esc(c.name)}</b><br><span class="small">${esc(c.job)}</span></span><span style="margin-left:auto">編集 ›</span></button>`).join('')}</div>`;return;}let c=chars.find(x=>x.id===editId);if(!c)c={name:'',reading:'',job:'',age:'',height:'',tag:'',bio:'',story:'',spoiler:'',image:'',stats:{},skills:{},scenarios:[]};app.innerHTML=`<div class="small">CHARACTER EDITOR</div><h1>${editId!=='__new__'?'探索者を編集':'探索者を追加'}</h1><div class="notice">入力後は「保存する」を押してください。画像は大きすぎるとブラウザの保存容量を超える場合があります。</div><form id="editor" onsubmit="submitEdit(event)"><div class="editor-section"><details class="editor-fold" open><summary><span>基本情報</span><small>名前・職業・使用中・ロスト・紹介</small></summary><div class="editor-fold-body"><h2>探索者の状態</h2><label class="lost-toggle"><input type="checkbox" name="inUse" ${c.inUse?'checked':''}>現在使用中の探索者</label><label class="field"><span>ロスト種別</span><select name="lostType" onchange="updateLostControls()">${Object.entries(LOST_TYPES).map(([value,label])=>`<option value="${value}" ${lostType(c)===value?'selected':''}>${label}</option>`).join('')}</select></label><label class="lost-toggle" id="noReturnOption"><input type="checkbox" name="noReturn" ${c.noReturn?'checked':''}>復帰不可（ロスト種別とは別に記録）</label><p class="small">旧版のロスト済み探索者は「ロスト（種別未設定）」として保持されます。</p><div class="two"><label class="field"><span>名前</span><input name="name" required value="${esc(c.name)}" onblur="splitEditorReading()"></label><label class="field"><span>読み</span><input name="reading" value="${esc(c.reading)}"></label><label class="field"><span>職業</span><input name="job" value="${esc(c.job)}"></label><label class="field"><span>年齢</span><input name="age" value="${esc(c.age)}"></label><label class="field"><span>身長（cm）</span><input name="height" value="${esc(c.height)}"></label><label class="field"><span>作品・シナリオタグ</span><input name="tag" value="${esc(c.tag)}"></label></div><label class="field"><span>職業タグ（カンマ区切りで複数登録）</span><input name="jobTags" placeholder="例：警察関係, 公務員, 捜査職" value="${esc(getTags(c).join(', '))}"></label><p class="small">職業名は「刑事」、職業タグは「警察関係」のように設定できます。</p></div></details></div><div class="editor-section"><details class="editor-fold"><summary><span>立ち絵・画像</span><small>差分追加・順番変更</small></summary><div class="editor-fold-body"><h2>立ち絵差分</h2><p class="small">複数選択で差分を追加できます。先頭の画像が一覧にも表示されます。↑↓で並び替えできます。</p><input type="file" accept="image/*" multiple onchange="addGalleryImages(event)"><div id="galleryStatus" class="small" aria-live="polite"></div><div id="galleryEditor"></div></div></details></div><div class="editor-section"><details class="editor-fold"><summary><span>人物紹介・経歴</span><small>プロフィール文と経歴</small></summary><div class="editor-fold-body"><label class="field"><span>人物紹介</span><textarea name="bio">${esc(c.bio)}</textarea></label><label class="field"><span>経歴・メモ</span><textarea name="story">${esc(c.story)}</textarea></label></div></details></div><div class="editor-section"><details class="editor-fold"><summary><span>不定の狂気</span><small>症状・期間・技能補正</small></summary><div class="editor-fold-body"><h2>不定の狂気（専用管理）</h2><p class="small">種類・条件・期間・治癒状態・補正ON/OFFを個別に管理します。元の技能値は変更しません。</p><div id="madnessEditor">${madnessEntries(c).map(m=>madnessRow(m)).join("")}</div><button type="button" class="btn" onclick="addMadnessRow()">＋ 不定の狂気を追加</button></div></details></div><div class="editor-section"><details class="editor-fold"><summary><span>記録・メモ</span><small>アーティファクト・後遺症・秘匿・シナリオ</small></summary><div class="editor-fold-body"><h2>追加メモ</h2><p class="small">アーティファクト・後遺症・その他を自由に登録できます。</p><div id="memoEditor">${(Array.isArray(c.extraMemos)?c.extraMemos:[]).map(m=>memoEditorRow(m.type,m.body)).join('')}</div><button type="button" class="btn" onclick="addMemoRow()">＋ メモ欄を追加</button><label class="field"><span>秘匿・ネタバレメモ</span><textarea name="spoiler">${esc(c.spoiler)}</textarea></label><label class="field"><span>通過シナリオ（1行に1つ）</span><textarea name="scenarios">${esc((c.scenarios||[]).join('\n'))}</textarea></label></div></details></div><div class="editor-section"><details class="editor-fold"><summary><span>能力値・技能</span><small>能力値・HP・MP・SAN・技能編集</small></summary><div class="editor-fold-body"><h2>能力値</h2><div class="stats">${['STR','CON','POW','DEX','APP','SIZ','INT','EDU'].map(k=>`<label class="field"><span>${k}</span><input type="number" name="stat_${k}" value="${esc(c.stats?.[k]??'')}"></label>`).join('')}</div><div class="two">${['hp','mp','san','sanMax'].map(k=>`<label class="field"><span>${k.toUpperCase()}</span><input type="number" name="${k}" value="${esc(c[k]??'')}"></label>`).join('')}</div><h2>技能</h2><div class="small">技能名 / 現在値 / 初期値</div><div id="skillEditor">${Object.entries(c.skills||{}).map(([k,v])=>skillInput(k,v.value,v.base)).join('')}</div><button type="button" class="btn" onclick="addSkill()">＋ 技能を追加</button></div></details></div><div class="editor-section"><details class="editor-fold"><summary><span>いあきゃら取り込み</span><small>TXTファイル・テキスト貼り付け</small></summary><div class="editor-fold-body"><h2>いあきゃらテキスト取り込み</h2><p class="small">6版テキスト出力を貼ると、能力値と技能を入力欄へ反映します。保存前に内容を確認してください。</p><label class="field"><span>スマホ内のテキストファイル（.txt）</span><input type="file" id="iacharaTxtFile" accept=".txt,text/plain" onchange="loadIacharaTxt(event)"></label><p class="small" id="iacharaFileStatus" aria-live="polite">ファイルを選ぶと下の入力欄に内容を読み込みます。確認後に「テキストから反映」を押してください。</p><textarea id="iacharaText" placeholder="いあきゃらテキスト 6版…"></textarea><button type="button" class="btn" onclick="parseIachara()">テキストから反映</button></div></details></div><div class="actions"><button class="btn" type="button" onclick="editId=null;route('edit')">← 編集対象一覧へ</button><button class="btn primary" type="submit">変更を保存する</button>${editId!=='__new__'?'<button class="btn danger" type="button" onclick="deleteCharacter()">この探索者を削除</button>':''}</div></form>`;pendingGallery=[...galleryOf(c)];drawGalleryEditor();updateLostControls()}
+function skillInput(name='',value='',base=''){return `<div class="editSkill"><input class="skName" placeholder="技能名" value="${esc(name)}"><input class="skValue" type="number" min="0" max="999" placeholder="値" value="${esc(value)}"><input class="skBase" type="number" min="0" max="999" placeholder="初期" value="${esc(base)}"><button type="button" onclick="this.parentElement.remove()">×</button></div>`}
+function addSkill(){document.getElementById('skillEditor').insertAdjacentHTML('beforeend',skillInput())}
+function previewImage(e){let f=e.target.files[0];if(!f)return;if(f.size>3*1024*1024&&!confirm('画像が3MBを超えています。保存できない可能性があります。続けますか？')){e.target.value='';return}let reader=new FileReader();reader.onload=()=>{window.pendingImage=reader.result;document.getElementById('imagePreview').textContent='画像を読み込みました（保存前）'};reader.readAsDataURL(f)}
+function submitEdit(e){e.preventDefault();splitEditorReading();let f=e.target,form=new FormData(f);let old=chars.find(x=>x.id===editId);let c=old?structuredClone(old):{id:'c'+Date.now(),skills:{},stats:{}};for(let k of ['name','reading','job','age','height','tag','bio','story','spoiler'])c[k]=String(form.get(k)||'');c.lostType=String(form.get('lostType')||'active');c.noReturn=form.has('noReturn');c.inUse=form.has('inUse');c.lost=c.lostType!=='active';c.jobTags=String(form.get('jobTags')||'').split(/[,、\n]/).map(x=>x.trim()).filter(Boolean);c.scenarios=String(form.get('scenarios')||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);for(let k of ['STR','CON','POW','DEX','APP','SIZ','INT','EDU']){let v=form.get('stat_'+k);c.stats[k]=v===''?'':Number(v)}for(let k of ['hp','mp','san','sanMax']){let v=form.get(k);c[k]=v===''?'':Number(v)}const priorSkills=c.skills||{};c.skills={};let rows=document.querySelectorAll('.editSkill');rows.forEach(r=>{let name=r.querySelector('.skName').value.trim();if(name){const v=r.querySelector('.skValue').value,b=r.querySelector('.skBase').value;c.skills[name]={...(priorSkills[name]&&typeof priorSkills[name]==='object'?priorSkills[name]:{}),value:v===''?0:Number(v),base:b===''?null:Number(b)}}});c.images=[...pendingGallery];c.image=c.images[0]||'';c.madness=readMadnessEditor();c.extraMemos=[...document.querySelectorAll('#memoEditor .memo-edit-row')].map(row=>({type:row.querySelector('.memoType').value,body:row.querySelector('.memoBody').value})).filter(m=>m.body.trim());let previous=structuredClone(chars);if(old)chars[chars.findIndex(x=>x.id===editId)]=c;else chars.push(c);if(!save()){chars=previous;return}selected=c.id;editId=c.id;openChar(c.id)}
+function deleteCharacter(){if(!confirm('この探索者を削除しますか？ 削除前にバックアップをおすすめします。'))return;chars=chars.filter(x=>x.id!==editId);if(save()){editId=null;route('list')}}
+async function loadIacharaTxt(event){
+ const input=event.target, file=input.files&&input.files[0];
+ if(!file)return;
+ const status=document.getElementById('iacharaFileStatus');
+ try{
+  if(!/\.txt$/i.test(file.name)&&file.type!=='text/plain')throw Error('TXT形式のファイルを選んでください。');
+  if(file.size>2*1024*1024)throw Error('2MB以下のテキストファイルを選んでください。');
+  const bytes=await file.arrayBuffer();
+  let content=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+  if(!content.trim())throw Error('ファイルが空です。');
+  const textarea=document.getElementById('iacharaText');
+  if(!textarea)throw Error('入力画面が見つかりません。');
+  if(textarea.value.trim()&&!confirm('入力欄のテキストを選択したファイルの内容で置き換えますか？'))return;
+  textarea.value=content.replace(/^\uFEFF/,'');
+  if(status)status.textContent='読み込み完了：'+file.name+'（内容を確認して「テキストから反映」を押してください）';
+ }catch(err){if(status)status.textContent='読み込み失敗：'+err.message;alert('TXTファイルを読み込めませんでした：'+err.message)}
+ finally{input.value=''}
+}
+function parseIachara(){let t=document.getElementById('iacharaText').value;if(!t.trim())return alert('テキストを貼り付けてください');let fields={name:/名前:\s*(.+)/,job:/職業:\s*(.+)/,age:/年齢:\s*([^\/\n]+)/,height:/身長:\s*([^\n]+)/};for(let [k,re] of Object.entries(fields)){let m=t.match(re);if(m){let el=document.querySelector(`[name="${k}"]`);if(el)el.value=m[1].trim()}}splitEditorReading();let stat=t.match(/【能力値】([\s\S]*?)(?:【技能値】|$)/);if(stat){for(let k of ['STR','CON','POW','DEX','APP','SIZ','INT','EDU','HP','MP']){let m=stat[1].match(new RegExp('^\\s*'+k+'\\s+(\\d+)','m'));let el=document.querySelector(`[name="${['HP','MP'].includes(k)?k.toLowerCase():'stat_'+k}"]`);if(m&&el)el.value=m[1]}}let san=t.match(/正気度\s+(\d+)\s*\/\s*(\d+)/);if(san){document.querySelector('[name=san]').value=san[1];document.querySelector('[name=sanMax]').value=san[2]}let section='';let count=0;let entries=[];for(let line of t.split(/\r?\n/)){let m=line.match(/『(戦闘技能|探索技能|行動技能|交渉技能|知識技能)』/);if(m){section=m[1];continue}if(!section)continue;let hit=line.match(/^\s*(.+?)\s{2,}(\d+)\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s*$/);if(hit){entries.push(skillInput(hit[1].trim(),hit[2],hit[3]));count++}}if(count)document.getElementById('skillEditor').innerHTML=entries.join('');alert(`取り込みました（技能 ${count} 件）。内容を確認して「変更を保存する」を押してください。`)}
+// 一括TXT取り込み：既存データを上書きせず、確認後に追加する。
+let bulkCandidates=[];
+function bulkImportPage(){
+ app.innerHTML=`<button class="btn" onclick="route('edit')">← 追加・編集へ</button><div class="small">BULK IMPORT</div><h1>TXTから一括登録</h1><div class="panel"><p>いあきゃらのテキストファイルを複数選択してください。既存の探索者は変更しません。</p><input id="bulkTxtFiles" type="file" accept=".txt,text/plain" multiple onchange="readBulkTxt(event)" style="max-width:100%"><p class="small">1ファイル2MB以下・UTF-8形式。登録前に確認できます。</p></div><div id="bulkResults"></div>`;
+ bulkCandidates=[];
+}
+function parseIacharaRecord(t){
+ const read=re=>{let m=t.match(re);return m?m[1].trim():''};
+ const name=read(/(?:^|\n)名前[：:]\s*([^\r\n]+)/);
+ if(!name)throw Error('名前の項目が見つかりません');
+ const split=splitNameReading(name);
+ const c={name:split?split.name:name,reading:split?split.reading:'',job:read(/(?:^|\n)職業[：:]\s*([^\r\n]+)/),age:read(/(?:^|\n)年齢[：:]\s*([^\/\r\n]+)/),height:read(/(?:^|\n)身長[：:]\s*([^\r\n]+)/),tag:'',bio:'',story:'',spoiler:'',image:'',jobTags:[],stats:{},skills:{},scenarios:[]};
+ const stat=t.match(/【能力値】([\s\S]*?)(?:【技能値】|$)/);
+ if(stat){for(const k of ['STR','CON','POW','DEX','APP','SIZ','INT','EDU','HP','MP']){const m=stat[1].match(new RegExp('^\\s*'+k+'\\s+(\\d+)','m'));if(m){if(k==='HP'||k==='MP')c[k.toLowerCase()]=Number(m[1]);else c.stats[k]=Number(m[1]);}}}
+ const san=t.match(/正気度\s+(\d+)\s*\/\s*(\d+)/);if(san){c.san=Number(san[1]);c.sanMax=Number(san[2]);}
+ let section='';for(const line of t.split(/\r?\n/)){
+  const sectionMatch=line.match(/『(戦闘技能|探索技能|行動技能|交渉技能|知識技能)』/);if(sectionMatch){section=sectionMatch[1];continue;}
+  if(!section)continue;
+  const hit=line.match(/^\s*(.+?)\s{2,}(\d+)\s+(\d+)\s+\d+\s+\d+\s+\d+\s+\d+\s*$/);
+  if(hit)c.skills[hit[1].trim()]={value:Number(hit[2]),base:Number(hit[3])};
+ }
+ if(!Object.keys(c.stats).length&&!Object.keys(c.skills).length)throw Error('能力値・技能値を解析できませんでした（形式を確認してください）');
+ return c;
+}
+async function readBulkTxt(event){
+ const files=Array.from(event.target.files||[]);bulkCandidates=[];
+ const results=document.getElementById('bulkResults');if(!results)return;
+ const lines=[];
+ for(const file of files){try{
+  if(!/\.txt$/i.test(file.name))throw Error('TXT形式ではありません');
+  if(file.size>2*1024*1024)throw Error('2MBを超えています');
+  const bytes=await file.arrayBuffer();const content=new TextDecoder('utf-8',{fatal:true}).decode(bytes).replace(/^\uFEFF/,'');
+  const c=parseIacharaRecord(content);bulkCandidates.push(c);
+  lines.push(`<div class="panel"><b>✓ ${esc(file.name)}</b><p>${esc(c.name)} / ${esc(c.job||'職業未設定')} / 技能 ${Object.keys(c.skills).length} 件</p></div>`);
+ }catch(err){lines.push(`<div class="panel"><b>✕ ${esc(file.name)}</b><p class="small">${esc(err.message)}</p></div>`);}}
+ results.innerHTML=`<h2>読み込み結果：${bulkCandidates.length} / ${files.length} 件</h2>${lines.join('')}${bulkCandidates.length?'<button class="btn primary" onclick="commitBulkTxt()">確認した探索者をまとめて登録</button>':''}`;
+ event.target.value='';
+}
+function commitBulkTxt(){
+ if(!bulkCandidates.length)return;
+ if(!confirm(`${bulkCandidates.length}人の探索者を新規追加します。よろしいですか？`))return;
+ const previous=chars.slice();
+ const used=new Set(chars.map(c=>c.id));
+ for(const c of bulkCandidates){let id;do{id='c'+Date.now().toString(36)+Math.random().toString(36).slice(2,10)}while(used.has(id));used.add(id);chars.push({...c,id});}
+ if(!save()){chars=previous;return;}
+ const count=bulkCandidates.length;bulkCandidates=[];alert(`${count}人の探索者を登録しました。`);route('list');
+}
+function settingsPage(){app.innerHTML=`<div class="small">LOCAL DATA MANAGEMENT</div><h1>保存とバックアップ</h1><div class="panel"><h2>この端末のデータ</h2><p>登録済み探索者：<b>${chars.length} 人</b></p><p class="notice">編集内容はこのブラウザのローカル保存領域に記録されます。ブラウザのデータ削除・端末変更・ファイルの開き方によって失われたり別データ扱いになる場合があります。定期的にJSONバックアップを保存してください。</p><div class="actions"><button class="btn primary" onclick="exportJson()">↓ JSONバックアップを保存</button><button class="btn" onclick="document.getElementById('importFile').click()">↑ JSONを読み込む</button></div></div><div class="panel"><h2>探索者の一括登録</h2><p>複数のいあきゃらTXTファイルをまとめて取り込みます。</p><button class="btn" onclick="bulkImportPage()">複数TXTを選んで登録</button></div><div class="panel"><h2>ふりがなの一括整理</h2><p>名前の末尾にある（読み）を、登録済み探索者もまとめて振り分けます。変更内容を確認してから保存します。</p><button class="btn" onclick="readingCleanupPage()">ふりがなの一括整理を開く</button></div><div class="panel"><h2>技能区分のカスタマイズ</h2><p>基本区分は維持したまま、技能ごとに表示先を変更できます。</p><button class="btn" onclick="categorySettingsPage()">技能区分を編集する</button></div><div class="panel"><h2>オフラインで使う</h2><p>このHTMLは外部の通信を必要としません。ダウンロードしてブラウザで開けば、ネット接続なしで利用できます。</p><p class="small">端末やブラウザによっては file:// での保存が制限される場合があります。その場合はJSONを書き出してデータを保管してください。</p></div><div class="panel"><h2>データを初期化</h2><button class="btn danger" onclick="resetAll()">探索者データをすべて削除</button></div>`}
+function exportJson(){let blob=new Blob([JSON.stringify({format:'jinbutsucho-v1',exportedAt:new Date().toISOString(),characters:chars,skillPreferences:skillPrefs,skillCategoryOverrides:categoryOverrides},null,2)],{type:'application/json'});let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='人物帖_バックアップ_'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+document.getElementById('importFile').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let data=JSON.parse(await f.text());let arr=Array.isArray(data)?data:data.characters;if(!Array.isArray(arr)||!arr.every(c=>c&&typeof c==='object'&&typeof c.name==='string'&&typeof c.id==='string'&&c.id.length>0&&(!c.skills||typeof c.skills==='object'&&!Array.isArray(c.skills))))throw Error('人物帖のバックアップ形式ではありません');if(new Set(arr.map(c=>c.id)).size!==arr.length)throw Error('探索者IDが重複しています');if(!confirm(`探索者 ${arr.length} 人のデータで現在のデータを置き換えますか？`))return;let old=chars;chars=arr;if(!save()){chars=old;return}if(data.skillPreferences&&Array.isArray(data.skillPreferences.favorites)&&Array.isArray(data.skillPreferences.order)){skillPrefs=data.skillPreferences;saveSkillPrefs()}if(data.skillCategoryOverrides&&typeof data.skillCategoryOverrides==='object'&&!Array.isArray(data.skillCategoryOverrides)){categoryOverrides=data.skillCategoryOverrides;saveCategoryOverrides()}route('list');alert('読み込みました')}catch(err){alert('読み込みに失敗しました：'+err.message)}finally{e.target.value=''}});
+function resetAll(){if(!confirm('この安定版の探索者データをすべて消しますか？'))return;let old=chars;chars=[];if(!save()){chars=old;return}route('list')}
+
+// 思い出ギャラリー v1.6.8：画像を独立した記録にし、アルバムは画像IDの集合だけを保持する。
+const MEMORY_DB='jinbutsucho_memories_v1';
+let memoryPictures=[],memoryCollections=[],memoryMode='all',memoryQuery='',memoryTag='',memoryCurrentAlbum=null,memoryViewerItems=[],memoryViewerIndex=0,memoryBack='gallery';
+function memoryId(){return 'm'+Date.now().toString(36)+Math.random().toString(36).slice(2,11)}
+function memoryTags(v){return [...new Set((Array.isArray(v)?v.join(','):String(v||'')).split(/[,、，\n#＃]+/).map(x=>x.trim()).filter(Boolean))]}
+function memorySafeId(id){return encodeURIComponent(id)}
+function memoryDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(MEMORY_DB,2);req.onupgradeneeded=()=>{
+ const db=req.result,tx=req.transaction;
+ if(!db.objectStoreNames.contains('albums'))db.createObjectStore('albums',{keyPath:'id'});
+ const pics=db.objectStoreNames.contains('pictures')?tx.objectStore('pictures'):db.createObjectStore('pictures',{keyPath:'id'});
+ const collections=db.objectStoreNames.contains('collections')?tx.objectStore('collections'):db.createObjectStore('collections',{keyPath:'id'});
+ // 旧アルバムの画像を画像単位へ変換。元データは削除せず保持する。
+ const old=tx.objectStore('albums').getAll();
+ old.onsuccess=()=>{for(const a of old.result||[]){
+  const ids=[];(a.images||[]).forEach((im,i)=>{const id='legacy_'+a.id+'_'+i;ids.push(id);pics.put({id,data:im.data,title:im.caption||'',tags:memoryTags([...memoryTags(a.tags),...memoryTags(im.tags)]),scenario:a.scenario||'',period:a.period||'',members:a.members||'',memo:im.memo||a.memo||'',createdAt:a.createdAt||new Date().toISOString(),updatedAt:a.updatedAt||new Date().toISOString()})});
+  collections.put({id:'legacy_album_'+a.id,title:a.title||'無題のアルバム',pictureIds:ids,createdAt:a.createdAt||new Date().toISOString(),updatedAt:a.updatedAt||new Date().toISOString()});
+ }};
+};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function memoryGetAll(store){const db=await memoryDb();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readonly'),r=tx.objectStore(store).getAll();r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>reject(r.error);tx.oncomplete=()=>db.close();tx.onerror=()=>reject(tx.error)})}
+async function memoryPut(store,obj){const db=await memoryDb();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(obj);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
+async function memoryDelete(store,id){const db=await memoryDb();return new Promise((resolve,reject)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(id);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error)}})}
+async function memoryReload(){memoryPictures=await memoryGetAll('pictures');memoryCollections=await memoryGetAll('collections')}
+function memoryPicture(id){return memoryPictures.find(p=>p.id===id)}
+function memoryAlbum(id){return memoryCollections.find(a=>a.id===id)}
+function memoryAlbumsFor(id){return memoryCollections.filter(a=>(a.pictureIds||[]).includes(id))}
+function memoryMatch(p){const q=memoryQuery.trim().toLocaleLowerCase('ja');return (!memoryTag||memoryTags(p.tags).includes(memoryTag))&&(!q||[p.title,p.scenario,p.period,p.members,p.memo,...memoryTags(p.tags),...memoryAlbumsFor(p.id).map(a=>a.title)].join(' ').toLocaleLowerCase('ja').includes(q))}
+function memorySorted(arr){return [...arr].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))}
+function memoryTagChoices(){const m=new Map();for(const p of memoryPictures)for(const t of memoryTags(p.tags))m.set(t,(m.get(t)||0)+1);return [...m].sort((a,b)=>b[1]-a[1]).slice(0,24)}
+async function galleryAlbumsPage(){app.innerHTML='<h1>思い出</h1><div class="panel">読み込み中…</div>';try{await memoryReload();memoryDrawAlbums()}catch(e){app.innerHTML=`<h1>思い出</h1><div class="notice">ギャラリーを開けませんでした：${esc(e.message)}</div>`}}
+function memoryDrawAlbums(){
+ app.innerHTML=`<div class="small">MEMORY GALLERY / ${memoryPictures.length} IMAGES</div><h1>思い出</h1>
+ <div class="actions"><button class="btn primary" onclick="document.getElementById('memoryUpload').click()">＋ イラストを追加</button><button class="btn" onclick="memoryCreateAlbum()">＋ アルバム</button><button class="btn" onclick="memoryBackupPage()">バックアップ</button></div>
+ <div class="panel" style="margin-top:12px"><b>✦ 思い出との再会</b><p class="small">今表示している検索条件のイラストから、ランダムで出会います。1回・10連とも全画像が同じ確率です。</p><div class="memory-gacha-actions"><button class="btn primary" onclick="memoryDrawGacha(1)">✦ 1回引く</button><button class="btn primary" onclick="memoryDrawGacha(10)">✦ 10連で出会う</button></div><details style="margin-top:12px"><summary>📱 NFC・QRで思い出ガチャを起動</summary><p class="small">1回・10連それぞれの起動用リンクを作れます。登録した画像はこの端末の人物帖から抽選されます。</p><div class="memory-gacha-actions"><button class="btn" onclick="memoryShowGachaQR(1)">1回のQRを表示</button><button class="btn" onclick="memoryShowGachaQR(10)">10連のQRを表示</button><button class="btn" onclick="memoryCopyGachaLink(1)">1回のNFC用URL</button><button class="btn" onclick="memoryCopyGachaLink(10)">10連のNFC用URL</button></div></details></div>
+ <input hidden type="file" id="memoryUpload" accept="image/jpeg,image/png,image/webp" multiple onchange="memoryUpload(event)">
+ <p id="memoryUploadStatus" class="small"></p>
+ <div class="tabs"><button class="btn ${memoryMode==='all'?'primary':''}" onclick="memoryMode='all';memoryRenderResults()">すべての画像</button><button class="btn ${memoryMode==='albums'?'primary':''}" onclick="memoryMode='albums';memoryDrawAlbums()">アルバム</button></div>
+ <label class="field"><span>イラスト名・タグ・シナリオ・メモで検索</span><input id="memorySearch" value="${esc(memoryQuery)}" placeholder="例：VOID / 自陣 / エンドカード" oninput="memoryQuery=this.value;memoryRenderResults()"></label>
+ <div class="actions" id="memoryTagBar"></div><div id="memoryResults"></div>`;
+ memoryRenderResults();
+}
+function memoryRenderResults(){
+ const host=document.getElementById('memoryResults');if(!host)return;
+ const bar=document.getElementById('memoryTagBar');if(bar)bar.innerHTML=memoryTagChoices().map(([t,n])=>`<button class="btn ${memoryTag===t?'primary':''}" style="padding:6px 9px;font-size:12px" onclick="memoryChooseTag(decodeURIComponent('${encodeURIComponent(t)}'))">#${esc(t)} (${n})</button>`).join('')+(memoryTag?'<button class="btn" onclick="memoryChooseTag(\'\')">解除 ×</button>':'');
+ const tabs=document.querySelector('.tabs');if(tabs)tabs.innerHTML=`<button class="btn ${memoryMode==='all'?'primary':''}" onclick="memoryMode='all';memoryDrawAlbums()">すべての画像</button><button class="btn ${memoryMode==='albums'?'primary':''}" onclick="memoryMode='albums';memoryDrawAlbums()">アルバム</button>`;
+ if(memoryMode==='albums'){
+  const albums=memoryCollections.filter(a=>!memoryQuery.trim()&&!memoryTag||a.title.toLocaleLowerCase('ja').includes(memoryQuery.trim().toLocaleLowerCase('ja'))&&!memoryTag||(a.pictureIds||[]).some(id=>{const p=memoryPicture(id);return p&&memoryMatch(p)}));
+  host.innerHTML=`<div class="memory-albums">${memorySorted(albums).map(a=>{const p=(a.pictureIds||[]).map(memoryPicture).find(Boolean);return `<button class="memory-album" onclick="memoryOpenAlbum(decodeURIComponent('${memorySafeId(a.id)}'))">${p?`<img class="memory-cover" src="${esc(p.data)}" alt="">`:'<div class="memory-cover">📁</div>'}<div class="memory-album-body"><strong>${esc(a.title)}</strong><div class="small">${(a.pictureIds||[]).filter(id=>memoryPicture(id)).length}枚</div></div></button>`}).join('')}</div>${albums.length?'':'<div class="empty">アルバムはまだありません</div>'}`;return;
+ }
+ const pics=memorySorted(memoryPictures.filter(memoryMatch));host.innerHTML=`<p class="small">${pics.length}枚のイラスト</p><div class="memory-grid">${pics.map(p=>`<button class="memory-tile" onclick="memoryOpenImage(decodeURIComponent('${memorySafeId(p.id)}'))" title="${esc(p.title||'イラスト')}"><img loading="lazy" src="${esc(p.data)}" alt="${esc(p.title||'イラスト')}"></button>`).join('')}</div>${pics.length?'':'<div class="empty">イラストがありません。「＋ イラストを追加」から画像を登録できます。</div>'}`;
+}
+function memoryChooseTag(t){memoryTag=memoryTag===t?'':t;memoryRenderResults()}
+async function memoryConvertImage(file){if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('JPEG・PNG・WebPのみ対応しています');if(file.size>25*1024*1024)throw Error('25MBを超える画像は追加できません');const url=URL.createObjectURL(file);try{const img=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(Error('画像を開けません'));im.src=url});const scale=Math.min(1,1600/Math.max(img.naturalWidth,img.naturalHeight)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);return {data:canvas.toDataURL('image/webp',.83),title:file.name.replace(/\.[^.]+$/,'')}}finally{URL.revokeObjectURL(url)}}
+async function memoryUpload(e){const files=[...(e.target.files||[])];if(!files.length)return;const status=document.getElementById('memoryUploadStatus');if(status)status.textContent='画像を保存しています…';let n=0,errors=[];for(const f of files){try{const pic=await memoryConvertImage(f);await memoryPut('pictures',{id:memoryId(),...pic,tags:[],scenario:'',period:'',members:'',memo:'',createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});n++}catch(err){errors.push(f.name+'：'+err.message)}}await memoryReload();memoryDrawAlbums();if(errors.length)alert(n+'枚保存しました。失敗：'+errors.join(' / '));e.target.value=''}
+
+const memoryRitualHtml="\u003c!doctype html>\u003chtml lang=\"ja\">\u003chead>\u003cmeta charset=\"utf-8\">\u003cmeta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">\u003ctitle>\u4eba\u7269\u5e16 | \u65e7\u304d\u5370\u306e\u708e DELUXE \u2014 \u52a0\u901f\u56de\u8ee2\u30fb\u7dda\u3092\u4f1d\u3046\u81ea\u7136\u71c3\u713c\u003c/title>\u003cstyle>\n:root{font-family:system-ui,'Noto Sans JP',sans-serif;color:#f3e6d3;background:#090909}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#281a1b,#08090b 70%)}.app{max-width:470px;margin:auto;padding:14px 12px 32px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.kicker{font:10px monospace;letter-spacing:.24em;color:#dca875}h1{font-size:19px;margin:5px 0}.pill{font:10px monospace;border:1px solid #725345;border-radius:30px;padding:8px;color:#c9a17c}.stage{height:min(72dvh,690px);min-height:470px;position:relative;overflow:hidden;isolation:isolate;border:1px solid #72513c;border-radius:13px;background:radial-gradient(ellipse at 50% 44%,#3c191b 0%,#120e12 43%,#06080a 80%);box-shadow:0 20px 60px #000c}.stage:before{content:\"\";position:absolute;inset:0;opacity:.2;background:repeating-linear-gradient(0deg,transparent 0 3px,#f5ba7d13 4px 5px);pointer-events:none;z-index:14}.stage:after{content:\"\";position:absolute;inset:0;box-shadow:inset 0 0 110px #000;pointer-events:none;z-index:16}.canvas{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none}#flames{z-index:6;mix-blend-mode:screen}.ambient{position:absolute;inset:-20%;background:radial-gradient(circle,#d15d2233,transparent 55%);opacity:0;z-index:1}.sigilwrap{position:absolute;width:min(108%,490px);aspect-ratio:1;top:44%;left:50%;transform:translate(-50%,-50%) scale(.5) rotate(-35deg);opacity:0;z-index:5;filter:drop-shadow(0 0 8px #ff6b27)}.sigil{width:100%;height:100%;overflow:visible}.glyph{fill:none;stroke:#caa36b;stroke-width:1.15;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--len,1000);stroke-dashoffset:var(--len,1000);filter:drop-shadow(0 0 2px #e8aa5e)}.glyph.major{stroke-width:2.1}.glyph.eye{stroke:#ffcb80;stroke-width:2.4}.ringA,.ringB,.ringC{transform-origin:200px 200px}.figurewrap{position:absolute;z-index:8;inset:10% 0 9%;display:flex;align-items:end;justify-content:center;opacity:0;transform:translateY(35px) scale(.84);filter:brightness(0) drop-shadow(0 0 30px #e46b2c)}.figurewrap img{max-width:94%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 0 18px #f3a65a66)}.placeholder{width:70%;height:92%;background:linear-gradient(140deg,#aa6b44,#37252e 48%,#111318);clip-path:polygon(43% 2%,57% 2%,66% 10%,67% 25%,59% 35%,75% 40%,87% 82%,76% 100%,20% 100%,12% 82%,24% 40%,41% 35%,32% 25%,33% 10%);filter:drop-shadow(0 0 30px #d4734a)}.floor{position:absolute;bottom:4%;left:5%;width:90%;height:19%;background:radial-gradient(ellipse,#e76b2755,transparent 65%);opacity:0;z-index:3}.light{position:absolute;left:50%;top:47%;width:12%;height:130%;transform:translate(-50%,-50%) scaleX(.1);background:linear-gradient(90deg,transparent,#ffe7a5a8 40%,#fff8dc 50%,#ffe7a5a8 60%,transparent);filter:blur(8px);opacity:0;z-index:7}.burst{position:absolute;inset:-20%;background:radial-gradient(circle at 50% 45%,#fff6d8,#ff9a4c 20%,#bd392255 43%,transparent 66%);opacity:0;z-index:11;pointer-events:none}.eyeoverlay{position:absolute;top:44%;left:50%;width:80px;height:43px;transform:translate(-50%,-50%) scale(.5);border:2px solid #ffe2a5;border-radius:50% 10% 50% 10%;rotate:45deg;opacity:0;z-index:12;box-shadow:0 0 30px #f80}.eyeoverlay:after{content:\"\";position:absolute;left:33%;top:18%;width:26px;height:26px;border-radius:50%;background:#fff3ca;box-shadow:0 0 30px #ffb42e}.nameplate{position:absolute;bottom:6%;width:100%;text-align:center;z-index:15;opacity:0;transform:translateY(25px);text-shadow:0 2px 15px #000}.nameplate .sub{font:10px monospace;letter-spacing:.3em;color:#f4b77d}.nameplate h2{font-size:clamp(27px,7vw,37px);margin:7px 0;letter-spacing:.14em}.nameplate p{font-size:12px;color:#e0c7ae;margin:0}.corner{position:absolute;z-index:17;font:9px monospace;letter-spacing:.14em;color:#b98762}.corner.a{top:16px;left:15px}.corner.b{bottom:14px;right:13px}.status{font:11px monospace;letter-spacing:.12em;text-align:center;color:#d9b189;margin:10px 0}.buttons{display:flex;gap:8px;margin-top:11px}button,.upload{border:1px solid #8a6048;border-radius:9px;background:#201819;color:#f6e4cf;padding:13px 10px;font:inherit;cursor:pointer}.buttons button{flex:1}button.primary{background:#d4a26b;color:#21120e;font-weight:800}.settings{margin-top:13px;border:1px solid #4a3931;border-radius:12px;padding:12px;display:grid;gap:10px}.settings label{font-size:12px;color:#d5b9a0}.settings input[type=text]{width:100%;padding:11px;border:1px solid #695044;background:#120f12;color:white;border-radius:7px;font:inherit}.upload{display:block;text-align:center;font-size:12px}.upload input{display:none}.note{font-size:11px;line-height:1.7;color:#bba99d;margin-top:10px}.stage.play .ambient{animation:ambient 7s both}.stage.play .sigilwrap{animation:appear 1.3s .2s both,implode 1s 5.0s both}.stage.play .glyph{animation:trace 1.25s var(--delay) ease-out both,burn 1.3s calc(var(--delay) + 2.25s) ease-in both}.stage.play .glyph.eye{animation:trace 1.1s 1.65s both,eyeburn 1.35s 4.25s both}.stage.play .ringA{animation:accelerateA 5.15s 1s linear both}.stage.play .ringB{animation:accelerateB 5.15s 1s linear both}.stage.play .ringC{animation:accelerateC 5.15s 1s linear both}.stage.play .light{animation:beam 1.15s 5.45s both}.stage.play .burst{animation:blast 1.15s 5.8s both}.stage.play .figurewrap{animation:reveal 1.5s 6.1s both}.stage.play .floor{animation:floor .9s 5.7s both}.stage.play .nameplate{animation:namereveal .9s 7.1s both}.stage.play .eyeoverlay{animation:eyeflash .7s 4.9s both}@keyframes ambient{10%,90%{opacity:1}100%{opacity:.45}}@keyframes appear{to{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}}@keyframes implode{0%{opacity:1}100%{opacity:0;filter:brightness(4) blur(12px);transform:translate(-50%,-50%) scale(1.5) rotate(18deg)}}@keyframes trace{to{stroke-dashoffset:0}}@keyframes burn{0%{stroke:#f5bd75;stroke-dashoffset:0;filter:drop-shadow(0 0 3px #f60)}35%{stroke:#fff0c6;filter:drop-shadow(0 0 12px #ff6d00)}65%{stroke:#ff581e;filter:drop-shadow(0 0 15px #f40)}100%{stroke:#332c2b;stroke-dashoffset:var(--len);opacity:0;filter:blur(3px)}}@keyframes eyeburn{0%{stroke-dashoffset:0}45%{stroke:#fff;filter:drop-shadow(0 0 18px #ff4500)}100%{opacity:0;stroke-dashoffset:var(--len)}}@keyframes accelerateA{0%{transform:rotate(0deg)}20%{transform:rotate(25deg)}40%{transform:rotate(100deg)}60%{transform:rotate(280deg)}80%{transform:rotate(660deg)}100%{transform:rotate(1320deg)}}@keyframes accelerateB{0%{transform:rotate(0deg)}20%{transform:rotate(-35deg)}40%{transform:rotate(-145deg)}60%{transform:rotate(-410deg)}80%{transform:rotate(-970deg)}100%{transform:rotate(-1890deg)}}@keyframes accelerateC{0%{transform:rotate(0deg)}20%{transform:rotate(45deg)}40%{transform:rotate(190deg)}60%{transform:rotate(540deg)}80%{transform:rotate(1260deg)}100%{transform:rotate(2520deg)}}@keyframes beam{0%{opacity:0;transform:translate(-50%,-50%) scaleX(.1)}50%{opacity:1;transform:translate(-50%,-50%) scaleX(3)}100%{opacity:0;transform:translate(-50%,-50%) scaleX(12)}}@keyframes blast{0%{opacity:0;transform:scale(.2)}35%{opacity:1}100%{opacity:0;transform:scale(2)}}@keyframes reveal{0%{opacity:0;transform:translateY(40px) scale(.82);filter:brightness(0) drop-shadow(0 0 30px #f80)}45%{opacity:1;filter:brightness(3) drop-shadow(0 0 40px #f80)}100%{opacity:1;transform:translateY(0) scale(1);filter:brightness(1)}}@keyframes floor{to{opacity:1}}@keyframes namereveal{to{opacity:1;transform:translateY(0)}}@keyframes eyeflash{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}50%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(2)}}@media(prefers-reduced-motion:reduce){.stage.play .sigilwrap{display:none}.stage.play .figurewrap,.stage.play .nameplate{animation-duration:.1s;animation-delay:.2s}}\n\nhtml,body{height:100%;overflow:hidden;background:#07080a}.app{padding:0;max-width:none;height:100%;display:block}.top,.controls,.note,.actions,.hint,.footer{display:none!important}.stage{width:100vw;height:100dvh;min-height:0;max-height:none;border:0;border-radius:0}.figurewrap,.nameplate{display:block}\n\u003c/style>\u003cstyle>\nhtml,body{width:100%;height:100%;overflow:hidden!important;background:transparent!important}\n.app{max-width:none!important;padding:0!important;width:100%;height:100%}\n.top,.controls,.panel,.bottom,.kicker,h1,.pill,#play,#skip{display:none!important}\n.stage{width:100%;height:100dvh!important;min-height:0!important;border:0!important;border-radius:0!important;background:radial-gradient(ellipse at center,#171c29 0%,#070910 75%)!important;box-shadow:none!important}\n.sigilwrap{width:min(96vw,76dvh,540px)!important;top:48%!important;filter:drop-shadow(0 0 3px #ffffff88)!important}\n.glyph,.glyph.eye{stroke:#fff!important;filter:drop-shadow(0 0 1px #ffffff66)!important}\n.figurewrap,.nameplate,.placeholder,.floor{display:none!important}\n.ambient{background:radial-gradient(circle,#ffffff44,transparent 55%)!important}\n\u003c/style>\u003c/head>\u003cbody>\u003cmain class=\"app\">\u003cdiv class=\"top\">\u003cdiv>\u003cdiv class=\"kicker\">PERSONAL ARCHIVE / SUMMON PROTOCOL\u003c/div>\u003ch1>\u65e7\u304d\u5370\u306e\u708e \u003cspan style=\"font-size:11px;color:#c9956a\">DELUXE\u003c/span>\u003c/h1>\u003c/div>\u003cdiv class=\"pill\">ELDER SEAL\u003c/div>\u003c/div>\u003cdiv class=\"stage\" id=\"stage\">\u003cdiv class=\"ambient\">\u003c/div>\u003cdiv class=\"corner a\">RITUAL SEQUENCE // 07\u003c/div>\u003cdiv class=\"corner b\">ARCHIVE // UNSEALED\u003c/div>\u003ccanvas class=\"canvas\" id=\"flames\">\u003c/canvas>\u003ccanvas class=\"canvas\" id=\"particles\">\u003c/canvas>\u003cdiv class=\"floor\">\u003c/div>\u003cdiv class=\"sigilwrap\">\u003csvg class=\"sigil\" viewBox=\"0 0 400 400\" id=\"sigil\" aria-label=\"\u4e94\u8292\u661f\u3068\u773c\u306e\u5e7e\u4f55\u5b66\u7684\u306a\u53ec\u559a\u9663\">\u003cg class=\"ringA\">\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"184\"/>\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"175\"/>\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"166\"/>\u003cpath class=\"glyph\" d=\"M200 16V34 M200 366V384 M16 200H34 M366 200H384 M70 70l15 15 M315 315l15 15 M70 330l15 -15 M315 85l15 -15\"/>\u003c/g>\u003cg class=\"ringB\">\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"152\"/>\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"138\"/>\u003cpath class=\"glyph\" d=\"M200 48L332 276L68 276Z M200 352L68 124L332 124Z\"/>\u003c/g>\u003cg class=\"ringC\">\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"119\"/>\u003cpath class=\"glyph major\" d=\"M200 89 L265.2 289.5 L94.5 165.5 L305.5 165.5 L134.8 289.5 Z\"/>\u003cpath class=\"glyph\" d=\"M200 102L287 263L112 263Z M200 298L112 137L287 137Z\"/>\u003c/g>\u003cg>\u003ccircle class=\"glyph\" cx=\"200\" cy=\"200\" r=\"78\"/>\u003cpath class=\"glyph eye\" d=\"M134 200 Q200 138 266 200 Q200 262 134 200Z\"/>\u003ccircle class=\"glyph eye\" cx=\"200\" cy=\"200\" r=\"25\"/>\u003ccircle class=\"glyph eye\" cx=\"200\" cy=\"200\" r=\"10\"/>\u003cpath class=\"glyph eye\" d=\"M200 147V158 M200 242V253 M128 200H140 M260 200H272\"/>\u003c/g>\u003c/svg>\u003c/div>\u003cdiv class=\"eyeoverlay\">\u003c/div>\u003cdiv class=\"light\">\u003c/div>\u003cdiv class=\"figurewrap\" id=\"figure\">\u003cdiv class=\"placeholder\" id=\"placeholder\">\u003c/div>\u003cimg id=\"portrait\" alt=\"\u63a2\u7d22\u8005\u306e\u7acb\u3061\u7d75\" hidden>\u003c/div>\u003cdiv class=\"burst\">\u003c/div>\u003cdiv class=\"nameplate\">\u003cdiv class=\"sub\">INVESTIGATOR MANIFESTED\u003c/div>\u003ch2 id=\"displayName\">UNKNOWN\u003c/h2>\u003cp id=\"displayTitle\">\u5c01\u5370\u3055\u308c\u305f\u8a18\u9332\u304c\u3001\u3044\u307e\u89e3\u304b\u308c\u308b\u3002\u003c/p>\u003c/div>\u003c/div>\u003cdiv class=\"status\" id=\"status\">READY // TAP TO INITIATE\u003c/div>\u003cdiv class=\"buttons\">\u003cbutton class=\"primary\" id=\"play\">\u2726 \u53ec\u559a\u3092\u958b\u59cb\u003c/button>\u003cbutton id=\"skip\">\u30b9\u30ad\u30c3\u30d7\u003c/button>\u003c/div>\u003cdiv class=\"settings\">\u003clabel>\u63a2\u7d22\u8005\u540d\u003cinput type=\"text\" id=\"name\" value=\"\u63a2\u7d22\u8005\u306e\u540d\u524d\" maxlength=\"30\">\u003c/label>\u003clabel>\u79f0\u53f7\u30fb\u7d39\u4ecb\u6587\u003cinput type=\"text\" id=\"title\" value=\"\u5c01\u5370\u3055\u308c\u305f\u8a18\u9332\u304c\u3001\u3044\u307e\u89e3\u304b\u308c\u308b\u3002\" maxlength=\"80\">\u003c/label>\u003clabel class=\"upload\">\uff0b \u7acb\u3061\u7d75PNG\u3092\u9078\u629e\uff08\u7aef\u672b\u5185\u3067\u30d7\u30ec\u30d3\u30e5\u30fc\uff09\u003cinput type=\"file\" id=\"file\" accept=\"image/png,image/webp,image/jpeg\">\u003c/label>\u003c/div>\u003cp class=\"note\">\u72ec\u7acb\u3057\u305f\u6f14\u51fa\u8a66\u4f5c\u7248\u3067\u3059\u3002\u4eba\u7269\u5e16\u306e\u4fdd\u5b58\u30c7\u30fc\u30bf\u306f\u5909\u66f4\u3057\u307e\u305b\u3093\u3002\u7acb\u3061\u7d75\u306f\u3053\u306e\u30da\u30fc\u30b8\u5185\u3067\u306e\u307f\u8aad\u307f\u8fbc\u307f\u3001\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3055\u308c\u307e\u305b\u3093\u3002NFC\u9023\u643a\u30fb\u4eba\u7269\u5e16\u9023\u52d5\u306f\u672a\u5b9f\u88c5\u3067\u3059\u3002\u97f3\u58f0\u306a\u3057\u3067\u518d\u751f\u3067\u304d\u307e\u3059\u3002\u9b54\u6cd5\u9663\u306e\u7dda\u3092\u706b\u304c\u8d70\u308a\u3001\u71c3\u3048\u305f\u7b87\u6240\u304b\u3089\u5c0f\u3055\u306a\u708e\u3068\u7070\u304c\u751f\u307e\u308c\u307e\u3059\u3002\u003c/p>\u003c/main>\u003cscript>\nconst stage=document.getElementById('stage'),canvas=document.getElementById('particles'),ctx=canvas.getContext('2d'),flameCanvas=document.getElementById('flames'),fx=flameCanvas.getContext('2d');let particles=[],start=0,raf=0,playing=false;const glyphs=[...document.querySelectorAll('.glyph')];glyphs.forEach((el,i)=>{let len=el.getTotalLength?.()||1000;el.style.setProperty('--len',len);el.style.setProperty('--delay',(0.35+i*.105)+'s')});let W=0,H=0,dpr=1;function resize(){let r=canvas.getBoundingClientRect();dpr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);flameCanvas.width=W*dpr;flameCanvas.height=H*dpr;fx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();\n// SVG path geometry is sampled in screen space, so flames remain attached\n// to the actual rotating lines rather than appearing at random positions.\nconst paths=glyphs.map((el,i)=>({el,i,len:el.getTotalLength(),delay:el.classList.contains('eye')?1.65:.35+i*.105,eye:el.classList.contains('eye')}));\nlet flames=[],lastT=0;\nfunction pointOnPath(item,fraction){\n  const p=item.el.getPointAtLength(Math.max(0,Math.min(item.len,item.len*fraction)));\n  const m=item.el.getScreenCTM(),rect=flameCanvas.getBoundingClientRect();\n  if(!m)return null;\n  return {x:m.a*p.x+m.c*p.y+m.e-rect.left,y:m.b*p.x+m.d*p.y+m.f-rect.top};\n}\nfunction makeFlame(x,y,tangentX,tangentY,power=1){\n const n=Math.hypot(tangentX,tangentY)||1;\n const dx=tangentX/n,dy=tangentY/n;\n flames.push({x,y,vx:dx*(.2+Math.random()*.5)+(Math.random()-.5)*.35,\n vy:-.65-Math.random()*.65,life:15+Math.random()*15,max:30,\n size:(2+Math.random()*3)*power,phase:Math.random()*6.28});\n}\nfunction fire(t){\n fx.clearRect(0,0,W,H);\n if(t\u003c1.4||t>6.45){flames=[];return}\n fx.save();fx.globalCompositeOperation='lighter';\n // A thin ignition front moves along each individual stroke.\n for(const item of paths){\n   const ignition=item.eye?4.25:item.delay+2.25;\n   const duration=item.eye?1.35:1.3;\n   const progress=(t-ignition)/duration;\n   if(progress\u003c0||progress>1.08)continue;\n   const front=Math.max(0,Math.min(1,progress));\n   const p=pointOnPath(item,front);\n   if(!p)continue;\n   const prev=pointOnPath(item,Math.max(0,front-.015))||p;\n   // Bright hot tip clings to the line.\n   const halo=fx.createRadialGradient(p.x,p.y,0,p.x,p.y,12);\n   halo.addColorStop(0,'rgba(255,255,224,.9)');\n   halo.addColorStop(.22,'rgba(255,180,65,.72)');\n   halo.addColorStop(1,'rgba(255,70,15,0)');\n   fx.fillStyle=halo;fx.beginPath();fx.arc(p.x,p.y,12,0,Math.PI*2);fx.fill();\n   // Short flames trail the ignition front, rather than random flames everywhere.\n   for(let j=0;j\u003c3;j++){\n     const q=pointOnPath(item,Math.max(0,front-j*.025));\n     if(q&&Math.random()\u003c.65)makeFlame(q.x,q.y,p.x-prev.x,p.y-prev.y,j===0?1.2:.75);\n   }\n   if(Math.random()\u003c.8)particles.push({x:p.x,y:p.y,vx:(Math.random()-.5)*1.3,vy:-.4-Math.random()*1.4,life:25+Math.random()*35,max:60,size:.25+Math.random()*.7,ash:false,color:Math.random()\u003c.5?'#ffb35c':'#ff6c25'});\n   if(progress>.42&&Math.random()\u003c.35){\n     const ashP=pointOnPath(item,Math.random()*front);\n     if(ashP)particles.push({x:ashP.x,y:ashP.y,vx:(Math.random()-.5)*.9,vy:-.15-Math.random()*.5,life:35+Math.random()*45,max:80,size:.3+Math.random()*.7,ash:true,color:'#938b83'});\n   }\n }\n flames=flames.filter(f=>f.life-->0);\n for(const f of flames){\n   f.x+=f.vx;f.y+=f.vy;f.vx+=Math.sin(t*9+f.phase)*.055;\n   const alpha=Math.min(1,f.life/10)*Math.min(1,(f.max-f.life)/5);\n   const h=f.size*(2.4+Math.sin(t*12+f.phase)*.35);\n   const grad=fx.createLinearGradient(f.x,f.y,f.x+f.vx*3,f.y-h);\n   grad.addColorStop(0,`rgba(255,240,166,${.85*alpha})`);\n   grad.addColorStop(.4,`rgba(255,117,24,${.8*alpha})`);\n   grad.addColorStop(1,'rgba(190,25,5,0)');\n   fx.fillStyle=grad;\n   fx.beginPath();fx.moveTo(f.x-f.size*.48,f.y);\n   fx.quadraticCurveTo(f.x-f.size*.7,f.y-h*.55,f.x+f.vx*3,f.y-h);\n   fx.quadraticCurveTo(f.x+f.size*.7,f.y-h*.48,f.x+f.size*.48,f.y);\n   fx.closePath();fx.fill();\n }\n fx.restore();\n}\nfunction spawn(t){\n // Small ambient embers, with no unrelated large tongues of flame.\n const count=t>2.5&&t\u003c6.3?2:0;\n for(let i=0;i\u003ccount;i++){\n   const item=paths[Math.floor(Math.random()*paths.length)];\n   const p=pointOnPath(item,Math.random());\n   if(!p)continue;\n   particles.push({x:p.x,y:p.y,vx:(Math.random()-.5)*.5,vy:-.4-Math.random()*.7,life:28+Math.random()*35,max:65,size:.25+Math.random()*.55,ash:t>4.3,color:t>4.3?'#968b80':'#e68b44'});\n }\n}\nfunction frame(ts){if(!playing)return;let t=(ts-start)/1000;ctx.clearRect(0,0,W,H);fire(t);if(t\u003c7)spawn(t);ctx.globalCompositeOperation='lighter';particles=particles.filter(p=>p.life-->0);for(let p of particles){p.x+=p.vx;p.y+=p.vy;p.vx*=.995;p.vy+=p.ash?.012:-.008;ctx.globalAlpha=Math.min(1,p.life/35)*(p.ash?.5:1);ctx.fillStyle=p.color;ctx.shadowBlur=p.ash?0:5;ctx.shadowColor=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*(p.life/p.max+.35),0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.globalCompositeOperation='source-over';if(t\u003c9.1){raf=requestAnimationFrame(frame)}else{playing=false;document.getElementById('status').textContent='SUMMON COMPLETE // RECORD UNSEALED'}}function play(){cancelAnimationFrame(raf);playing=false;particles=[];flames=[];ctx.clearRect(0,0,W,H);fx.clearRect(0,0,W,H);stage.classList.remove('play');void stage.offsetWidth;stage.classList.add('play');document.getElementById('displayName').textContent=document.getElementById('name').value||'UNKNOWN';document.getElementById('displayTitle').textContent=document.getElementById('title').value||' ';document.getElementById('status').textContent='RITUAL IN PROGRESS // DO NOT INTERRUPT';start=performance.now();playing=true;raf=requestAnimationFrame(frame)}window.startRitual=play;document.getElementById('play').onclick=play;document.getElementById('skip').onclick=()=>{playing=false;cancelAnimationFrame(raf);ctx.clearRect(0,0,W,H);fx.clearRect(0,0,W,H);stage.classList.remove('play');document.getElementById('displayName').textContent=document.getElementById('name').value||'UNKNOWN';document.getElementById('displayTitle').textContent=document.getElementById('title').value||' ';const fig=document.getElementById('figure'),name=document.querySelector('.nameplate');fig.style.cssText='opacity:1;transform:none;filter:none';name.style.cssText='opacity:1;transform:none';document.getElementById('status').textContent='SUMMON SKIPPED // RECORD UNSEALED'};document.getElementById('play').addEventListener('click',()=>{document.getElementById('figure').style.cssText='';document.querySelector('.nameplate').style.cssText=''});let objectUrl=null;document.getElementById('file').onchange=e=>{let f=e.target.files[0];if(!f)return;if(objectUrl)URL.revokeObjectURL(objectUrl);objectUrl=URL.createObjectURL(f);let im=document.getElementById('portrait');im.src=objectUrl;im.hidden=false;document.getElementById('placeholder').hidden=true};\nwindow.addEventListener('load',()=>{setTimeout(play,120)});\u003c/script>\u003c/body>\u003c/html>\n";
+let memoryRitualTimer=null,memoryRitualCleanupTimer=null;
+function memoryStopRitual(){
+ if(memoryRitualTimer!==null){clearTimeout(memoryRitualTimer);memoryRitualTimer=null;}
+ if(memoryRitualCleanupTimer!==null){clearTimeout(memoryRitualCleanupTimer);memoryRitualCleanupTimer=null;}
+ document.getElementById('memoryRitualScreen')?.remove();
+}
+function memoryFinishRitual(){
+ if(memoryRitualTimer!==null){clearTimeout(memoryRitualTimer);memoryRitualTimer=null;}
+ const layer=document.getElementById('memoryRitualScreen');
+ // Render the illustration first, underneath the circle. Both remain on screen
+ // during the flash, rather than cutting to a separate black frame.
+ memoryShowGachaResults();
+ const results=document.getElementById('memoryGachaOverlay');
+ if(results){
+  results.classList.remove('memory-appearing','memory-settled');
+  void results.offsetWidth;
+  results.classList.add('memory-appearing');
+ }
+ if(!layer)return;
+ layer.classList.add('memory-revealing');
+ memoryRitualCleanupTimer=setTimeout(()=>{
+  // Lock the result at its final pose before removing the temporary
+  // animation class. Otherwise the original card reveal restarts and jolts.
+  if(results){
+   results.classList.add('memory-settled');
+   results.classList.remove('memory-appearing');
+  }
+  layer.remove();
+  memoryRitualCleanupTimer=null;
+ },960);
+}
+function memoryStartRitual(){
+ memoryStopRitual();
+ const layer=document.createElement('div');
+ layer.id='memoryRitualScreen';layer.className='memory-ritual-screen';
+ layer.innerHTML='<iframe title="白い魔法陣による思い出の召喚" sandbox="allow-scripts"></iframe><button class="memory-ritual-skip" onclick="memoryFinishRitual()">スキップ ›</button><div class="memory-ritual-label">✦ MEMORY ENCOUNTER ✦</div><div class="memory-ritual-burst" aria-hidden="true"></div>';
+ document.body.appendChild(layer);
+ const frame=layer.querySelector('iframe');
+ frame.srcdoc=memoryRitualHtml;
+ // Original 9-second ritual is played at 2x speed for a brisk memory reveal.
+ frame.addEventListener('load',()=>{
+  try{
+   // sandboxed frame cannot be accessed: CSS animations still run at their original pace.
+  }catch(_){}
+ },{once:true});
+ memoryRitualTimer=setTimeout(memoryFinishRitual,5950);
+}
+let memoryGachaResults=[],memoryGachaAlbumId=null;
+function memoryGachaRandomIndex(length){
+ if(globalThis.crypto?.getRandomValues){
+  const a=new Uint32Array(1),limit=Math.floor(4294967296/length)*length;
+  do{crypto.getRandomValues(a)}while(a[0]>=limit);
+  return a[0]%length;
+ }
+ return Math.floor(Math.random()*length);
+}
+function memoryDrawGacha(count,albumId=null){
+ const candidates=albumId?(memoryAlbum(albumId)?.pictureIds||[]).map(memoryPicture).filter(Boolean):memoryPictures.filter(memoryMatch);
+ if(!candidates.length){alert('召喚できる思い出がありません。イラストを登録するか、検索条件を変更してね。');return;}
+ memoryGachaAlbumId=albumId;
+ memoryGachaResults=Array.from({length:count},()=>candidates[memoryGachaRandomIndex(candidates.length)]);
+ memoryStartRitual();
+}
+function memoryShowGachaResults(){
+ const results=memoryGachaResults;
+ if(!results.length)return;
+ let overlay=document.getElementById('memoryGachaOverlay');
+ if(!overlay){overlay=document.createElement('div');overlay.id='memoryGachaOverlay';overlay.className='memory-gacha-overlay';document.body.appendChild(overlay);}
+ const single=results.length===1;
+ overlay.innerHTML=`<div class="memory-gacha-top"><span class="small" style="color:#d6c09f">MEMORY ENCOUNTER</span><button class="btn" onclick="memoryCloseGacha()">閉じる ×</button></div>
+ <h2 class="memory-gacha-title">✦ 思い出との再会 ✦</h2><p class="memory-gacha-sub">${single?'ひとつの記憶が、あなたを待っていた。':'10の記憶が、いま蘇る。'}</p>
+ <div class="${single?'memory-gacha-single':'memory-gacha-grid'}">${results.map((p,i)=>`<div class="memory-gacha-card revealing" style="animation-delay:${Math.min(i*0.02,.18)}s"><img src="${esc(p.data)}" alt="${esc(p.title||'思い出')}"><div class="memory-gacha-caption">${esc(p.title||'無題の思い出')}</div><div style="text-align:center;padding:0 6px 9px"><button class="btn" style="font-size:12px" onclick="memoryGachaOpenPicture(${i})">詳しく見る</button></div></div>`).join('')}</div>
+ <div class="memory-gacha-actions-bottom"><button class="btn primary" onclick="memoryDrawGacha(${results.length},${memoryGachaAlbumId?`decodeURIComponent('${memorySafeId(memoryGachaAlbumId)}')`:'null'})">✦ もう一度${single?'1回':'10連'}引く</button><button class="btn" onclick="memoryCloseGacha()">思い出に戻る</button></div>`;
+ overlay.scrollTop=0;
+}
+function memoryCloseGacha(){memoryStopRitual();document.getElementById('memoryGachaOverlay')?.remove();memoryGachaResults=[];}
+function memoryGachaOpenPicture(i){
+ const p=memoryGachaResults[i];if(!p)return;
+ // The normal lightbox opens above the result screen and returns to it on close.
+ memoryViewerItems=[...memoryGachaResults];memoryViewerIndex=i;
+ memoryShowImage();
+}
+function memoryOpenImage(id,albumId){const p=memoryPicture(id);if(!p)return;memoryCurrentAlbum=albumId||null;memoryViewerItems=albumId?(memoryAlbum(albumId)?.pictureIds||[]).map(memoryPicture).filter(Boolean):memorySorted(memoryPictures.filter(memoryMatch));memoryViewerIndex=Math.max(0,memoryViewerItems.findIndex(x=>x.id===id));memoryShowImage()}
+function memoryShowImage(){const p=memoryViewerItems[memoryViewerIndex];if(!p)return;let overlay=document.getElementById('memoryLightbox');if(!overlay){overlay=document.createElement('div');overlay.id='memoryLightbox';overlay.className='memory-lightbox';document.body.appendChild(overlay)}
+ overlay.innerHTML=`<div class="actions" style="width:100%;justify-content:space-between"><button class="btn" onclick="memoryShiftImage(-1)">←</button><button class="btn" onclick="memoryCloseImage()">閉じる ×</button><button class="btn" onclick="memoryShiftImage(1)">→</button></div><img src="${esc(p.data)}" alt=""><div style="width:100%;max-width:650px;max-height:25dvh;overflow:auto"><b>${esc(p.title||'イラスト')}</b><div class="small" style="color:#ddd">${memoryViewerIndex+1}/${memoryViewerItems.length}　${memoryTags(p.tags).map(t=>'#'+esc(t)).join(' ')}</div><div class="small" style="color:#ddd">${esc(p.scenario||'')} ${esc(p.period||'')}</div><p class="memory-meta">${esc(p.memo||'')}</p><div class="actions">${(p.characterIds||[]).map(id=>chars.find(c=>String(c.id)===String(id))).filter(Boolean).map(c=>`<button class="btn" onclick="memoryGoToCharacter(decodeURIComponent('${memorySafeId(String(c.id))}'))">👤 ${esc(c.name)}</button>`).join('')}</div><button class="btn primary" onclick="memoryCloseImage();memoryEditPicture(decodeURIComponent('${memorySafeId(p.id)}'))">✎ 情報を編集・アルバムに追加</button></div>`;
+ overlay.ontouchstart=e=>{overlay.dataset.touchX=e.touches[0].clientX};overlay.ontouchend=e=>{if(!overlay.dataset.touchX)return;const d=e.changedTouches[0].clientX-Number(overlay.dataset.touchX);if(Math.abs(d)>65)memoryShiftImage(d<0?1:-1);delete overlay.dataset.touchX};
+}
+function memoryShiftImage(d){if(!memoryViewerItems.length)return;memoryViewerIndex=(memoryViewerIndex+d+memoryViewerItems.length)%memoryViewerItems.length;memoryShowImage()}
+function memoryCloseImage(){document.getElementById('memoryLightbox')?.remove()}
+function memoryFilterCharacters(q){const term=q.trim().toLocaleLowerCase('ja');document.querySelectorAll('.picCharRow').forEach(row=>{row.style.display=(row.dataset.name||'').toLocaleLowerCase('ja').includes(term)?'flex':'none'})}
+function memoryGoToCharacter(id){memoryCloseImage();if(!chars.some(c=>String(c.id)===String(id)))return;selected=chars.find(c=>String(c.id)===String(id)).id;tab='profile';view='detail';render();window.scrollTo(0,0)}
+async function memoryCharacterSection(id){
+ const holder=document.getElementById('characterMemorySection');if(holder)holder.remove();
+ const anchor=document.getElementById('detailContent');if(!anchor)return;
+ const section=document.createElement('section');section.id='characterMemorySection';section.className='panel';section.style.marginTop='14px';
+ section.innerHTML='<h2>📷 この子の思い出</h2><p class="small">読み込み中…</p>';anchor.after(section);
+ try{const pictures=await memoryGetAll('pictures');memoryPictures=pictures;if(!section.isConnected||view!=='detail'||String(selected)!==String(id))return;
+ const found=memorySorted(pictures.filter(p=>(p.characterIds||[]).map(String).includes(String(id))));
+ section.innerHTML=`<h2>📷 この子の思い出 <span class="small">(${found.length}枚)</span></h2>${found.length?`<div class="memory-grid">${found.map(p=>`<button class="memory-tile" onclick="memoryOpenCharacterPicture(decodeURIComponent('${memorySafeId(p.id)}'),decodeURIComponent('${memorySafeId(String(id))}'))"><img loading="lazy" src="${esc(p.data)}" alt="${esc(p.title||'思い出')}"></button>`).join('')}</div>`:'<p class="small">まだ紐付いたイラストはありません。思い出ギャラリーの「イラストの情報」から関連探索者を選べます。</p>'}<div class="actions" style="margin-top:12px"><button class="btn" onclick="memoryGoToGallery()">思い出ギャラリーへ →</button></div>`;
+ }catch(e){section.innerHTML='<h2>📷 この子の思い出</h2><p class="small">読み込みに失敗しました。</p>'}
+}
+function memoryOpenCharacterPicture(picId,charId){memoryCurrentAlbum=null;memoryViewerItems=memorySorted(memoryPictures.filter(p=>(p.characterIds||[]).map(String).includes(String(charId))));memoryViewerIndex=memoryViewerItems.findIndex(p=>p.id===picId);memoryOriginCharacter=charId;if(memoryViewerIndex<0){memoryGetAll('pictures').then(all=>{memoryPictures=all;memoryOpenCharacterPicture(picId,charId)});return}memoryShowImage()}
+let memoryOriginCharacter=null;
+function memoryGoToGallery(){memoryOriginCharacter=null;memoryCurrentAlbum=null;memoryMode='all';route('gallery')}
+
+function memoryEditPicture(id){const p=memoryPicture(id);if(!p)return;const selected=new Set(memoryAlbumsFor(id).map(a=>a.id));app.innerHTML=`<button class="btn" onclick="memoryReturn()">← 戻る</button><h1>イラストの情報</h1><div class="panel"><img src="${esc(p.data)}" alt="" style="width:100%;max-height:300px;object-fit:contain;border-radius:10px"><label class="field"><span>タイトル</span><input id="picTitle" value="${esc(p.title||'')}"></label><label class="field"><span>タグ（カンマ区切り）</span><input id="picTags" value="${esc(memoryTags(p.tags).join(', '))}" placeholder="自陣, エンドカード"></label><details><summary>シナリオ・時期・メモ（任意）</summary><label class="field"><span>シナリオ</span><input id="picScenario" value="${esc(p.scenario||'')}"></label><label class="field"><span>時期</span><input id="picPeriod" value="${esc(p.period||'')}"></label><label class="field"><span>探索者・関係者</span><textarea id="picMembers">${esc(p.members||'')}</textarea></label><label class="field"><span>思い出メモ</span><textarea id="picMemo">${esc(p.memo||'')}</textarea></label></details><details open><summary>関連探索者（複数選択可）</summary><label class="field"><span>名前で絞り込み</span><input id="picCharSearch" placeholder="探索者名を検索" oninput="memoryFilterCharacters(this.value)"></label><div id="picCharChoices" style="max-height:210px;overflow:auto">${chars.map(c=>`<label class="picCharRow" data-name="${esc((c.name||'')+' '+(c.reading||''))}" style="display:flex;align-items:center;gap:9px;padding:7px 0"><input class="picCharacter" type="checkbox" value="${esc(String(c.id))}" ${(p.characterIds||[]).map(String).includes(String(c.id))?'checked':''}><span>${esc(c.name||'名前なし')}</span></label>`).join('')||'<p class="small">登録済みの探索者がいません</p>'}</div></details><details><summary>アルバムに入れる（任意）</summary>${memoryCollections.map(a=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 0"><input type="checkbox" class="picAlbum" value="${esc(a.id)}" ${selected.has(a.id)?'checked':''}>${esc(a.title)}</label>`).join('')||'<p class="small">まだアルバムがありません。</p>'}</details><div class="actions"><button class="btn primary" onclick="memorySavePicture(decodeURIComponent('${memorySafeId(id)}'))">保存</button><button class="btn danger" onclick="memoryRemovePicture(decodeURIComponent('${memorySafeId(id)}'))">イラストを削除</button></div></div>`}
+async function memorySavePicture(id){const old=memoryPicture(id);if(!old)return;const p={...old,title:document.getElementById('picTitle').value.trim(),tags:memoryTags(document.getElementById('picTags').value),scenario:document.getElementById('picScenario').value.trim(),period:document.getElementById('picPeriod').value.trim(),members:document.getElementById('picMembers').value,memo:document.getElementById('picMemo').value,characterIds:[...document.querySelectorAll('.picCharacter:checked')].map(x=>x.value),updatedAt:new Date().toISOString()};const selected=new Set([...document.querySelectorAll('.picAlbum:checked')].map(x=>x.value));try{await memoryPut('pictures',p);for(const a of memoryCollections){const has=(a.pictureIds||[]).includes(id);if(has===selected.has(a.id))continue;await memoryPut('collections',{...a,pictureIds:selected.has(a.id)?[...(a.pictureIds||[]),id]:(a.pictureIds||[]).filter(x=>x!==id),updatedAt:new Date().toISOString()})}await memoryReload();memoryReturn()}catch(e){alert('保存に失敗しました：'+e.message)}}
+async function memoryRemovePicture(id){if(!confirm('このイラストを削除しますか？アルバムからも外れます。'))return;try{for(const a of memoryAlbumsFor(id))await memoryPut('collections',{...a,pictureIds:a.pictureIds.filter(x=>x!==id)});await memoryDelete('pictures',id);await memoryReload();memoryReturn()}catch(e){alert('削除に失敗しました：'+e.message)}}
+function memoryReturn(){if(memoryOriginCharacter){const id=memoryOriginCharacter;memoryOriginCharacter=null;memoryGoToCharacter(id);return}if(memoryCurrentAlbum&&memoryAlbum(memoryCurrentAlbum))memoryOpenAlbum(memoryCurrentAlbum);else memoryDrawAlbums()}
+function memoryCreateAlbum(id){const a=id?memoryAlbum(id):null;app.innerHTML=`<button class="btn" onclick="${id?`memoryOpenAlbum(decodeURIComponent('${memorySafeId(id)}'))`:'memoryDrawAlbums()'}">← 戻る</button><h1>${a?'アルバム名を変更':'アルバムを作る'}</h1><div class="panel"><label class="field"><span>アルバム名</span><input id="albumTitle" value="${esc(a?.title||'')}" placeholder="例：VOIDの思い出"></label><button class="btn primary" onclick="memorySaveCollection(${id?`decodeURIComponent('${memorySafeId(id)}')`:'null'})">保存</button></div>`}
+async function memorySaveCollection(id){const title=document.getElementById('albumTitle').value.trim();if(!title)return alert('アルバム名を入力してください');const old=id?memoryAlbum(id):null;const a={id:old?.id||memoryId(),title,pictureIds:old?.pictureIds||[],createdAt:old?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString()};try{await memoryPut('collections',a);await memoryReload();memoryOpenAlbum(a.id)}catch(e){alert('保存できませんでした：'+e.message)}}
+function memoryOpenAlbum(id){const a=memoryAlbum(id);if(!a)return;memoryCurrentAlbum=id;const pics=(a.pictureIds||[]).map(memoryPicture).filter(Boolean);app.innerHTML=`<button class="btn" onclick="memoryCurrentAlbum=null;memoryMode='albums';memoryDrawAlbums()">← アルバム一覧</button><h1>${esc(a.title)}</h1><div class="actions"><button class="btn primary" onclick="memorySelectAlbumPictures(decodeURIComponent('${memorySafeId(id)}'))">＋ 登録済み画像を選ぶ</button><button class="btn" onclick="memoryCreateAlbum(decodeURIComponent('${memorySafeId(id)}'))">名前変更</button><button class="btn danger" onclick="memoryRemoveCollection(decodeURIComponent('${memorySafeId(id)}'))">削除</button></div><div class="memory-gacha-actions"><button class="btn primary" onclick="memoryDrawGacha(1,decodeURIComponent('${memorySafeId(id)}'))">✦ このアルバムから1回</button><button class="btn primary" onclick="memoryDrawGacha(10,decodeURIComponent('${memorySafeId(id)}'))">✦ このアルバムから10連</button></div><details><summary>📱 このアルバム専用 NFC・QR</summary><div class="memory-gacha-actions"><button class="btn" onclick="memoryShowGachaQR(1,decodeURIComponent('${memorySafeId(id)}'))">1回のQR</button><button class="btn" onclick="memoryShowGachaQR(10,decodeURIComponent('${memorySafeId(id)}'))">10連のQR</button><button class="btn" onclick="memoryCopyGachaLink(1,decodeURIComponent('${memorySafeId(id)}'))">1回のURL</button><button class="btn" onclick="memoryCopyGachaLink(10,decodeURIComponent('${memorySafeId(id)}'))">10連のURL</button></div></details><p class="small">${pics.length}枚 · アルバムを削除してもイラストは残ります</p><div class="memory-grid">${pics.map(p=>`<button class="memory-tile" onclick="memoryOpenImage(decodeURIComponent('${memorySafeId(p.id)}'),decodeURIComponent('${memorySafeId(id)}'))"><img loading="lazy" src="${esc(p.data)}" alt="${esc(p.title||'イラスト')}"></button>`).join('')}</div>${pics.length?'':'<div class="empty">画像を選んで入れられます</div>'}`}
+function memorySelectAlbumPictures(id){const a=memoryAlbum(id);if(!a)return;const selected=new Set(a.pictureIds||[]);app.innerHTML=`<button class="btn" onclick="memoryOpenAlbum(decodeURIComponent('${memorySafeId(id)}'))">← 戻る</button><h1>アルバムに入れる画像</h1><p class="small">登録済みの画像を選択してください。画像そのものは移動・複製されません。</p><div class="memory-grid">${memorySorted(memoryPictures).map(p=>`<label style="position:relative;display:block"><img src="${esc(p.data)}" alt="${esc(p.title||'')}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px"><input class="albumPick" type="checkbox" value="${esc(p.id)}" ${selected.has(p.id)?'checked':''} style="position:absolute;top:8px;left:8px;width:23px;height:23px"></label>`).join('')}</div><div class="actions" style="margin-top:14px"><button class="btn primary" onclick="memorySaveAlbumSelection(decodeURIComponent('${memorySafeId(id)}'))">選択を保存</button></div>`}
+async function memorySaveAlbumSelection(id){const a=memoryAlbum(id);if(!a)return;const ids=[...document.querySelectorAll('.albumPick:checked')].map(x=>x.value);try{await memoryPut('collections',{...a,pictureIds:ids,updatedAt:new Date().toISOString()});await memoryReload();memoryOpenAlbum(id)}catch(e){alert('保存できませんでした：'+e.message)}}
+async function memoryRemoveCollection(id){const a=memoryAlbum(id);if(!a||!confirm('「'+a.title+'」を削除しますか？中のイラストは削除されません。'))return;try{await memoryDelete('collections',id);await memoryReload();memoryCurrentAlbum=null;memoryMode='albums';memoryDrawAlbums()}catch(e){alert('削除できませんでした：'+e.message)}}
+function memoryDownload(data,name){const blob=new Blob([JSON.stringify(data)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000)}
+function memoryBackupPage(){app.innerHTML=`<button class="btn" onclick="memoryDrawAlbums()">← 思い出へ</button><h1>思い出のバックアップ</h1><div class="panel"><p>画像・画像の情報・アルバムをまとめて保存します。探索者の通常のバックアップとは別です。</p><button class="btn primary" onclick="memoryExportBackup()">↓ 思い出を保存（JSON）</button></div><div class="panel"><h2>復元</h2><p>新形式のバックアップに加え、旧v1.6.5・v1.6.6のアルバムバックアップも読み込めます。同じIDのデータは上書きされます。</p><input type="file" accept=".json,application/json" onchange="memoryImportBackup(event)"></div>`}
+async function memoryExportBackup(){try{await memoryReload();memoryDownload({format:'jinbutsucho-memory-v2',exportedAt:new Date().toISOString(),pictures:memoryPictures,collections:memoryCollections},'人物帖_思い出_'+new Date().toISOString().slice(0,10)+'.json')}catch(e){alert('書き出せませんでした：'+e.message)}}
+async function memoryImportBackup(e){const file=e.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());let pics=[],albums=[];if(data.format==='jinbutsucho-memory-v2'){pics=data.pictures;albums=data.collections}else if(data.format==='jinbutsucho-memory-v1'&&Array.isArray(data.albums)){for(const a of data.albums){const ids=[];(a.images||[]).forEach((im,i)=>{const id='legacy_'+a.id+'_'+i;ids.push(id);pics.push({id,data:im.data,title:im.caption||'',tags:memoryTags([...memoryTags(a.tags),...memoryTags(im.tags)]),scenario:a.scenario||'',period:a.period||'',members:a.members||'',memo:im.memo||a.memo||'',createdAt:a.createdAt||new Date().toISOString()})});albums.push({id:'legacy_album_'+a.id,title:a.title,pictureIds:ids,createdAt:a.createdAt||new Date().toISOString()})}}else throw Error('対応していないバックアップです');if(!Array.isArray(pics)||!Array.isArray(albums)||!pics.every(p=>p&&typeof p.id==='string'&&/^data:image\/(webp|png|jpeg);base64,/.test(p.data))||!albums.every(a=>a&&typeof a.id==='string'&&typeof a.title==='string'&&Array.isArray(a.pictureIds)))throw Error('データ形式が不正です');if(!confirm(pics.length+'枚のイラストと'+albums.length+'冊のアルバムを復元しますか？'))return;for(const p of pics)await memoryPut('pictures',p);for(const a of albums)await memoryPut('collections',a);await memoryReload();memoryDrawAlbums();alert('復元しました')}catch(err){alert('復元に失敗しました：'+err.message)}finally{e.target.value=''}}
+
+load();render();handleIncomingSummon();handleIncomingMemoryGacha();
+</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(err=>console.warn("Offline setup failed",err)));}</script></body></html>
