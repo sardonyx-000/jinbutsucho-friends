@@ -164,14 +164,16 @@ const CharacterStore=(()=>{
 async function load(){chars=await CharacterStore.load();}
 let saving=false;
 async function save(){if(saving)return false;saving=true;const blocker=document.createElement('div');blocker.style.cssText='position:fixed;inset:0;z-index:99999;background:#0007;display:grid;place-items:center;color:white';blocker.textContent='保存中…';document.body.append(blocker);try{await CharacterStore.write(chars);return true}catch(e){alert('保存できませんでした。端末の空き容量をご確認ください。');return false}finally{saving=false;blocker.remove()}}
-function route(v){view=v;render();window.scrollTo(0,0)}
+function route(v){if(view==='bulkArt'&&v!=='bulkArt'&&bulkBusy)return;if(view==='bulkArt'&&v!=='bulkArt'&&bulkArt.length){if(!confirm('未保存の画像を破棄しますか？'))return;bulkArt=[];}view=v;render();window.scrollTo(0,0)}
 async function setProfileInUse(value,input){const c=chars.find(x=>x.id===selected);if(!c)return;const old=c.inUse;c.inUse=value;if(!(await save())){c.inUse=old;input.checked=!!old;return;}detailPage()}
-function openChar(id){gachaReturnCharacterId=null;selected=id;tab='profile';showInitialSkills=false;viewGalleryIndex=0;route('detail')}
+function openChar(id){searchSummonPool=null;gachaReturnCharacterId=null;selected=id;tab='profile';showInitialSkills=false;viewGalleryIndex=0;route('detail')}
 // A fresh iframe for each session prevents the editor/test lifecycle from
 // leaving a stale frame or touch layer above the archive's buttons.
 let summonSession=0;
 let gachaReturnCharacterId=null;
-function openSummon(mode="play"){
+let searchSummonPool=null;
+function openSummon(mode="play",fromSearch=false){
+ if(!fromSearch)searchSummonPool=null;
  const c=chars.find(x=>x.id===selected);
  if(!c){alert('探索者が見つかりません');return}
  const overlay=document.getElementById('summonIntegration');
@@ -179,6 +181,7 @@ function openSummon(mode="play"){
  if(previous)previous.remove();
  const frame=document.createElement('iframe');
  frame.id='summonFrame';
+ frame.dataset.searchGacha=fromSearch?'1':'0';
  frame.title='探索者召喚';
  frame.style.cssText='border:0;width:100%;height:100%;display:block';
  overlay.insertBefore(frame,overlay.firstChild);
@@ -187,13 +190,24 @@ function openSummon(mode="play"){
  summonSession++;
  overlay.classList.remove('hidden');
  document.body.style.overflow='hidden';
- frame.src='./summon.html?id='+encodeURIComponent(c.id)+'&portrait='+idx+'&mode='+encodeURIComponent(mode)+'&session='+summonSession+'&build=gacha-return-v3';
+ frame.src='./summon.html?id='+encodeURIComponent(c.id)+'&portrait='+idx+'&mode='+encodeURIComponent(mode)+'&session='+summonSession+'&build=gacha-replay-v8'+(fromSearch?'&searchGacha=1':'');
 }
 window.addEventListener('message',e=>{
  const frame=document.getElementById('summonFrame');
- if(e.source===frame?.contentWindow&&e.data?.type==='jinbutsucho-close-summon')closeSummon();
+ if(e.source!==frame?.contentWindow)return;
+ if(e.data?.type==='jinbutsucho-close-summon')closeSummon();
+ if(e.data?.type==='jinbutsucho-replay'||e.data?.type==='jinbutsucho-redraw-search'){
+  if(frame.dataset.searchGacha==='1'&&searchSummonPool?.length){
+   randomSummonFromSearch(true);
+  }else if(frame.dataset.searchGacha!=='1'){
+   openSummon('play',false);
+  }else{
+   alert('検索結果を保持できませんでした。検索画面からもう一度お試しください。');
+  }
+ }
 });
 function closeSummon(){
+ searchSummonPool=null;
  const overlay=document.getElementById('summonIntegration');
  // Hide synchronously, before tearing down the nested editor/ritual frames.
  overlay.classList.add('hidden');
@@ -266,7 +280,7 @@ async function handleIncomingMemoryGacha(){
  }catch(e){alert('思い出を読み込めませんでした：'+e.message)}
 }
 function activeNav(){document.querySelectorAll('nav button').forEach((b,i)=>b.classList.toggle('active',['list','search','edit','gallery','settings'][i]===view||(view==='detail'&&i===0)))}
-function render(){activeNav();if(view==='list')listPage();else if(view==='detail')detailPage();else if(view==='search')searchPage();else if(view==='edit')editPage();else if(view==='gallery')galleryAlbumsPage();else settingsPage()}
+function render(){activeNav();if(view==='list')listPage();else if(view==='detail')detailPage();else if(view==='search')searchPage();else if(view==='edit')editPage();else if(view==='gallery')galleryAlbumsPage();else if(view==='bulkArt')bulkArtPage();else settingsPage()}
 function listPage(){const sorts=[['name','名前（あいうえお順）'],...['STR','CON','POW','DEX','APP','SIZ','INT','EDU'].map(x=>[x,x])];app.innerHTML=`<div class="small">v1.6.4 / READING UPDATE / ${chars.length} RECORDS</div><h1>探索者たちの記録</h1><label class="field"><span>名前・職業・タグで検索</span><input id="nameFilter" placeholder="名前や職業で検索" oninput="filterCards()"></label><label class="lost-toggle"><input type="checkbox" ${hideLost?'checked':''} onchange="setHideLost(this.checked)">ロストした探索者を非表示（復帰不可のみは対象外）</label><div class="panel"><label class="lost-toggle"><input type="checkbox" ${listPrefs.activeFirst?'checked':''} onchange="setListPref('activeFirst',this.checked)">現行使用中の探索者を優先表示</label><label class="field"><span>並び替え</span><select onchange="setListPref('sort',this.value)">${sorts.map(([k,label])=>`<option value="${k}" ${listPrefs.sort===k?'selected':''}>${label}</option>`).join('')}</select></label><label class="lost-toggle"><input type="checkbox" ${listPrefs.desc?'checked':''} onchange="setListPref('desc',this.checked)">逆順（名前：ん→あ／能力値：低い順）</label></div><div class="grid" id="cards"></div>`;filterCards()}
 function setHideLost(value){hideLost=!!value;if(view==='list')filterCards();else if(view==='search')drawResults()}
 function filterCards(){const q=(document.getElementById('nameFilter')?.value||'').toLowerCase();let filtered=chars.filter(c=>(!hideLost||!isLost(c))&&[c.name,c.reading,c.job,c.tag,...getTags(c)].join(' ').toLowerCase().includes(q));document.getElementById('cards').innerHTML=sortList(filtered).map(c=>`<button class="card ${isLost(c)?'lost-card':''}" onclick="openChar(${JSON.stringify(c.id).replace(/"/g,'&quot;')})">${c.image?`<img src="${esc(c.image)}" alt="">`:`<div style="height:220px;display:grid;place-items:center;background:#ebe6df;color:#8c8277">NO IMAGE</div>`}<div class="info">${lostBadge(c)}${c.inUse?'<span class="pill" style="background:#e3f2e5;color:#245c38">使用中</span>':''}<span class="pill">${esc(c.job||'未設定')}</span><strong>${esc(c.name||'無名の探索者')}</strong><div class="small">${esc(c.reading||'')} / ${esc(c.age||'?')}歳</div></div></button>`).join('')||'<div class="empty">該当する探索者はいません。</div>'}
@@ -465,8 +479,9 @@ function skillPickerRows(filtered){return filtered.map(n=>`<div class="skill-pic
 function renderSkillPicker(keepFocus=false){const host=document.getElementById('skillPickerHost');if(!host||skillPickerIndex===null)return;const all=orderedSkillNames();const filtered=all.filter(n=>n.toLocaleLowerCase('ja').includes(skillPickerQuery.toLocaleLowerCase('ja')));host.innerHTML=`<div class="skill-overlay" onclick="if(event.target===this)closeSkillPicker()"><div class="skill-dialog" role="dialog" aria-modal="true" aria-label="技能を選ぶ"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><h2 style="margin:0">技能を選ぶ</h2><button class="btn" onclick="closeSkillPicker()">閉じる ×</button></div><p class="small">★ お気に入りは先頭へ。↑↓で表示順を変更できます。</p><input id="skillPickerSearch" class="skill-query" placeholder="技能名を入力して検索（例：心理）" value="${esc(skillPickerQuery)}" oninput="setSkillPickerQuery(this.value)"><div id="skillPickerList" class="skill-picker-list">${skillPickerRows(filtered)}</div><p class="small">表示順はこのブラウザに保存されます。検索結果や技能値は変更されません。</p></div></div>`;if(keepFocus){const input=document.getElementById('skillPickerSearch');input?.focus();input?.setSelectionRange(input.value.length,input.value.length)}}
 
 function matchingSearchCharacters(){return chars.filter(c=>{if(hideLost&&isLost(c))return false;if(jobFilter&&c.job!==jobFilter)return false;if(tagFilter&&!getTags(c).includes(tagFilter))return false;let checks=conditions.map(k=>{const data=c.skills?.[k.skill];if(!data)return false;const val=Number(data.value);if(!Number.isFinite(val)||val<k.min)return false;if(k.aboveBase){const base=Number(data.base);return Number.isFinite(base)&&val>base;}return true;});return conditionMode==='and'?checks.every(Boolean):checks.some(Boolean)});}
-function randomSummonFromSearch(){
- const candidates=matchingSearchCharacters();
+function randomSummonFromSearch(replay=false){
+ if(!replay)searchSummonPool=matchingSearchCharacters().map(c=>c.id);
+ const candidates=(searchSummonPool||[]).map(id=>chars.find(c=>c.id===id)).filter(Boolean);
  if(!candidates.length){alert('検索条件に一致する探索者がいません。');return;}
  // Use unbiased browser random when available; fallback for older browsers.
  let n;
@@ -481,7 +496,7 @@ function randomSummonFromSearch(){
  // Prepare the selected investigator's detail page behind the summon overlay.
  // Closing the summon will therefore return here, not to the search results.
  route('detail');
- openSummon('play');
+ openSummon('play',true);
 }
 function drawResults(){let arr=matchingSearchCharacters();let first=conditions[0]?.skill;arr.sort((a,b)=>advancedSort==='name'?a.name.localeCompare(b.name,'ja'):advancedSort==='job'?(a.job||'').localeCompare(b.job||'','ja')||a.name.localeCompare(b.name,'ja'):(advancedSort==='skill-asc'?1:-1)*((Number(a.skills?.[first]?.value)||0)-(Number(b.skills?.[first]?.value)||0)));document.getElementById('results').innerHTML=`<div class="small">検索結果 ${arr.length} / ${chars.length} 人</div><div class="panel" style="margin-top:12px"><h2 style="margin-top:0">✦ 条件からランダム召喚</h2><p class="small">現在の検索結果 ${arr.length} 人から、1人を同じ確率で選び、いつもの召喚演出で登場させます。</p><button class="btn primary" style="width:100%;padding:15px" ${arr.length?'':'disabled'} onclick="randomSummonFromSearch()">✦ ${arr.length}人からガチャを引く</button>${arr.length?'':'<p class="small">条件に一致する探索者がいないため、召喚できません。</p>'}</div><div class="panel">${arr.map((c,i)=>`<div class="rank" onclick="openChar(${JSON.stringify(c.id).replace(/"/g,'&quot;')})"><div class="num">${i+1}</div><div class="who"><b>${esc(c.name)}</b> ${isLost(c)?'<span class="lost-ribbon">LOST</span>':''}<div class="small">${esc(c.job||'職業未設定')}　${getTags(c).map(t=>`<span class="pill">${esc(t)}</span>`).join(' ')}</div><div class="small">${conditions.map(k=>`${esc(k.skill)} ${esc(c.skills?.[k.skill]?.value??'—')}%${k.aboveBase?'（初期値超過）':''}`).join(' / ')}</div></div></div>`).join('')||'<div class="empty">条件に一致する探索者はいません。</div>'}</div>`}
 function newCharacter(){window.pendingImage=null;editId='__new__';route('edit')}
@@ -587,7 +602,19 @@ async function commitBulkTxt(){
  if(!(await save())){chars=previous;return;}
  const count=bulkCandidates.length;bulkCandidates=[];alert(`${count}人の探索者を登録しました。`);route('list');
 }
-function settingsPage(){app.innerHTML=`<div class="small">LOCAL DATA MANAGEMENT</div><h1>保存とバックアップ</h1><div class="panel"><h2>この端末のデータ</h2><p>登録済み探索者：<b>${chars.length} 人</b></p><p class="notice">編集内容はこのブラウザのローカル保存領域に記録されます。ブラウザのデータ削除・端末変更・ファイルの開き方によって失われたり別データ扱いになる場合があります。定期的にJSONバックアップを保存してください。</p><div class="actions"><button class="btn primary" onclick="exportJson()">↓ JSONバックアップを保存</button><button class="btn" onclick="document.getElementById('importFile').click()">↑ JSONを読み込む</button></div></div><div class="panel"><h2>探索者の一括登録</h2><p>複数のいあきゃらTXTファイルをまとめて取り込みます。</p><button class="btn" onclick="bulkImportPage()">複数TXTを選んで登録</button></div><div class="panel"><h2>ふりがなの一括整理</h2><p>名前の末尾にある（読み）を、登録済み探索者もまとめて振り分けます。変更内容を確認してから保存します。</p><button class="btn" onclick="readingCleanupPage()">ふりがなの一括整理を開く</button></div><div class="panel"><h2>技能区分のカスタマイズ</h2><p>基本区分は維持したまま、技能ごとに表示先を変更できます。</p><button class="btn" onclick="categorySettingsPage()">技能区分を編集する</button></div><div class="panel"><h2>オフラインで使う</h2><p>このHTMLは外部の通信を必要としません。ダウンロードしてブラウザで開けば、ネット接続なしで利用できます。</p><p class="small">端末やブラウザによっては file:// での保存が制限される場合があります。その場合はJSONを書き出してデータを保管してください。</p></div><div class="panel"><h2>データを初期化</h2><button class="btn danger" onclick="resetAll()">探索者データをすべて削除</button></div>`}
+let bulkArt=[],bulkRecent='',bulkBusy=false;
+function bulkArtPage(){
+ view='bulkArt';activeNav();app.innerHTML=`<button class="btn" onclick="leaveBulkArt()">← 設定へ</button><h1>立ち絵一括登録</h1><div class="panel"><p>画像をまとめて読み込み、探索者名を選ぶだけで一括登録できます。</p><input id="bulkArtFiles" type="file" accept="image/*" multiple hidden onchange="readBulkArt(this)"><button class="btn primary" onclick="document.getElementById('bulkArtFiles').click()">＋ 画像をまとめて読み込む</button><p id="bulkArtStatus" class="small"></p></div><div id="bulkArtRows"></div><div class="panel" style="position:sticky;bottom:74px;z-index:5"><div id="bulkArtCount"></div><button class="btn primary" id="bulkArtSave" onclick="saveBulkArt()">まとめて登録</button></div>`;drawBulkArt();window.scrollTo(0,0);
+}
+function leaveBulkArt(){if(bulkBusy)return;if(bulkArt.length&&!confirm('未保存の画像を破棄しますか？'))return;bulkArt=[];route('settings')}
+function drawBulkArt(){const host=document.getElementById('bulkArtRows');if(!host)return;host.innerHTML=bulkArt.map((r,i)=>`<div class="panel" style="display:flex;align-items:center;gap:12px"><img loading="lazy" src="${esc(r.data)}" style="width:78px;height:100px;object-fit:contain;background:#ddd;border-radius:8px"><div style="flex:1;min-width:0"><div style="overflow-wrap:anywhere">${esc(r.name)}</div><button class="btn" style="width:100%;margin-top:8px" onclick="pickBulkArt(${i})">${esc(chars.find(c=>c.id===r.target)?.name||'探索者を選択')} ▾</button><button class="btn" onclick="removeBulkArt(${i})">除外</button></div></div>`).join('');const count=bulkArt.filter(r=>chars.some(c=>c.id===r.target)).length;document.getElementById('bulkArtCount').textContent=`${bulkArt.length}枚中 ${count}枚 割り当て済み`;document.getElementById('bulkArtSave').disabled=!count||bulkBusy;}
+function removeBulkArt(i){if(bulkBusy)return;bulkArt.splice(i,1);drawBulkArt()}
+function pickBulkArt(i){if(bulkBusy)return;const overlay=document.createElement('div');overlay.style.cssText='position:fixed;inset:0;background:#0009;z-index:300;display:grid;place-items:center;padding:16px';overlay.innerHTML=`<div class="panel" style="width:min(100%,440px);max-height:80vh;display:flex;flex-direction:column;gap:8px"><b>探索者を選択</b><input placeholder="名前・ふりがなで検索"><div style="overflow:auto;min-height:0" data-results></div><button class="btn" data-cancel>閉じる</button></div>`;document.body.append(overlay);const input=overlay.querySelector('input'),results=overlay.querySelector('[data-results]');function draw(){const q=input.value.replace(/\s/g,'').toLowerCase();results.replaceChildren();const candidates=chars.filter(c=>[c.name,c.reading].join(' ').replace(/\s/g,'').toLowerCase().includes(q)).sort((a,b)=>(b.id===bulkRecent)-(a.id===bulkRecent)||String(a.reading||a.name).localeCompare(String(b.reading||b.name),'ja'));for(const c of [{id:'',name:'未割り当て'},...candidates]){const b=document.createElement('button');b.className='btn';b.style.cssText='display:block;width:100%;text-align:left;margin:4px 0';b.textContent=c.name+(c.id===bulkRecent?'（最近選択）':'');b.onclick=()=>{bulkArt[i].target=c.id;if(c.id)bulkRecent=c.id;overlay.remove();drawBulkArt()};results.append(b)}}input.oninput=draw;overlay.querySelector('[data-cancel]').onclick=()=>overlay.remove();overlay.onclick=e=>{if(e.target===overlay)overlay.remove()};draw();}
+async function bulkArtConvert(f){const raw=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(f)});return new Promise((resolve,reject)=>{const img=new Image();img.onerror=reject;img.onload=()=>{try{const scale=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);resolve({raw,data:canvas.toDataURL('image/webp',.82)})}catch(e){reject(e)}};img.src=raw})}
+async function readBulkArt(input){if(bulkBusy)return;bulkBusy=true;const files=[...input.files];input.value='';input.disabled=true;drawBulkArt();let duplicates=0,failed=0;const status=document.getElementById('bulkArtStatus');try{for(let i=0;i<files.length;i++){if(status)status.textContent=`読み込み中 ${i+1}/${files.length}`;try{const f=files[i],{raw,data}=await bulkArtConvert(f);if(bulkArt.some(r=>r.data===data)){duplicates++;continue}bulkArt.push({name:f.name,data,raw,target:''})}catch(e){failed++}}}finally{bulkBusy=false;input.disabled=false;if(status)status.textContent=`読み込み完了：重複除外 ${duplicates}枚 / 読み込み失敗 ${failed}枚`;drawBulkArt()}}
+async function saveBulkArt(){if(bulkBusy||saving)return;const rows=bulkArt.filter(r=>chars.some(c=>c.id===r.target));if(!rows.length)return;bulkBusy=true;drawBulkArt();const previous=chars;let added=0,dups=0;try{const next=chars.map(c=>{const matched=rows.filter(r=>r.target===c.id);if(!matched.length)return c;const images=[...galleryOf(c)];for(const r of matched){if(images.includes(r.data)||images.includes(r.raw)){dups++;continue}images.push(r.data);added++}return {...c,images,image:images[0]||''}});chars=next;if(!(await save())){chars=previous;return}bulkArt=bulkArt.filter(r=>!rows.includes(r));alert(`${added}枚を登録しました。重複除外：${dups}枚。未割り当て画像は残しています。`)}catch(e){chars=previous;alert('登録に失敗しました')}finally{bulkBusy=false;drawBulkArt()}}
+
+function settingsPage(){app.innerHTML=`<div class="small">LOCAL DATA MANAGEMENT</div><h1>保存とバックアップ</h1><div class="panel"><h2>この端末のデータ</h2><p>登録済み探索者：<b>${chars.length} 人</b></p><p class="notice">編集内容はこのブラウザのローカル保存領域に記録されます。ブラウザのデータ削除・端末変更・ファイルの開き方によって失われたり別データ扱いになる場合があります。定期的にJSONバックアップを保存してください。</p><div class="actions"><button class="btn primary" onclick="exportJson()">↓ JSONバックアップを保存</button><button class="btn" onclick="document.getElementById('importFile').click()">↑ JSONを読み込む</button></div></div><div class="panel"><h2>立ち絵一括登録</h2><p>画像をまとめて探索者に振り分けます。</p><button class="btn primary" onclick="bulkArtPage()">立ち絵一括登録を開く</button></div><div class="panel"><h2>探索者の一括登録</h2><p>複数のいあきゃらTXTファイルをまとめて取り込みます。</p><button class="btn" onclick="bulkImportPage()">複数TXTを選んで登録</button></div><div class="panel"><h2>ふりがなの一括整理</h2><p>名前の末尾にある（読み）を、登録済み探索者もまとめて振り分けます。変更内容を確認してから保存します。</p><button class="btn" onclick="readingCleanupPage()">ふりがなの一括整理を開く</button></div><div class="panel"><h2>技能区分のカスタマイズ</h2><p>基本区分は維持したまま、技能ごとに表示先を変更できます。</p><button class="btn" onclick="categorySettingsPage()">技能区分を編集する</button></div><div class="panel"><h2>オフラインで使う</h2><p>このHTMLは外部の通信を必要としません。ダウンロードしてブラウザで開けば、ネット接続なしで利用できます。</p><p class="small">端末やブラウザによっては file:// での保存が制限される場合があります。その場合はJSONを書き出してデータを保管してください。</p></div><div class="panel"><h2>データを初期化</h2><button class="btn danger" onclick="resetAll()">探索者データをすべて削除</button></div>`}
 function exportJson(){let blob=new Blob([JSON.stringify({format:'jinbutsucho-v1',exportedAt:new Date().toISOString(),characters:chars,skillPreferences:skillPrefs,skillCategoryOverrides:categoryOverrides},null,2)],{type:'application/json'});let url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='人物帖_バックアップ_'+new Date().toISOString().slice(0,10)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 document.getElementById('importFile').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;try{let data=JSON.parse(await f.text());let arr=Array.isArray(data)?data:data.characters;if(!Array.isArray(arr)||!arr.every(c=>c&&typeof c==='object'&&typeof c.name==='string'&&typeof c.id==='string'&&c.id.length>0&&(!c.skills||typeof c.skills==='object'&&!Array.isArray(c.skills))))throw Error('人物帖のバックアップ形式ではありません');if(new Set(arr.map(c=>c.id)).size!==arr.length)throw Error('探索者IDが重複しています');if(!confirm(`探索者 ${arr.length} 人のデータで現在のデータを置き換えますか？`))return;let old=chars;chars=arr;if(!(await save())){chars=old;return}if(data.skillPreferences&&Array.isArray(data.skillPreferences.favorites)&&Array.isArray(data.skillPreferences.order)){skillPrefs=data.skillPreferences;saveSkillPrefs()}if(data.skillCategoryOverrides&&typeof data.skillCategoryOverrides==='object'&&!Array.isArray(data.skillCategoryOverrides)){categoryOverrides=data.skillCategoryOverrides;saveCategoryOverrides()}route('list');alert('読み込みました')}catch(err){alert('読み込みに失敗しました：'+err.message)}finally{e.target.value=''}});
 async function resetAll(){if(!confirm('この安定版の探索者データをすべて消しますか？'))return;let old=chars;chars=[];if(!(await save())){chars=old;return}route('list')}
